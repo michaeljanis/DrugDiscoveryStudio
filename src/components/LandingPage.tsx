@@ -184,6 +184,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           {/* Center Nav Links */}
           <nav style={{ display: 'flex', alignItems: 'center', gap: '1.4rem' }} className="desktop-nav">
             <a href="#acceleration" style={{ color: '#475569', textDecoration: 'none', fontSize: '0.84rem', fontWeight: 600, whiteSpace: 'nowrap', transition: 'color 0.2s' }}>Overview</a>
+            <a href="#mission" style={{ color: '#475569', textDecoration: 'none', fontSize: '0.84rem', fontWeight: 600, whiteSpace: 'nowrap', transition: 'color 0.2s' }}>Why We Built It</a>
             <a href="#architecture" style={{ color: '#475569', textDecoration: 'none', fontSize: '0.84rem', fontWeight: 600, whiteSpace: 'nowrap', transition: 'color 0.2s' }}>How It Works</a>
             <a href="#matrix" style={{ color: '#475569', textDecoration: 'none', fontSize: '0.84rem', fontWeight: 600, whiteSpace: 'nowrap', transition: 'color 0.2s' }}>Comparison</a>
             <a href="#benchmarks" style={{ color: '#475569', textDecoration: 'none', fontSize: '0.84rem', fontWeight: 600, whiteSpace: 'nowrap', transition: 'color 0.2s' }}>Case Studies</a>
@@ -609,6 +610,125 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               <div style={{ fontSize: '1.85rem', fontWeight: 800, color: '#4f46e5' }}>Frontier AI</div>
               <div style={{ fontSize: '0.78rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 700, marginTop: '0.2rem' }}>CSO Copilot AI</div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ----------------- SECTION: WHY WE BUILT IT ----------------- */}
+      <section id="mission" style={{
+        padding: '5rem 2rem 3rem 2rem',
+        maxWidth: '1240px',
+        margin: '0 auto'
+      }}>
+        <div style={{
+          background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
+          borderRadius: '24px',
+          padding: '3.5rem 3rem',
+          color: '#ffffff',
+          boxShadow: '0 25px 60px -15px rgba(0, 0, 0, 0.4), 0 0 35px rgba(6, 182, 212, 0.15)',
+          border: '1px solid rgba(6, 182, 212, 0.3)',
+          position: 'relative',
+          overflow: 'hidden'
+        }}>
+          {/* Subtle Background Glow Accent */}
+          <div style={{
+            position: 'absolute',
+            top: '-80px',
+            right: '-80px',
+            width: '320px',
+            height: '320px',
+            borderRadius: '50%',
+            background: 'radial-gradient(circle, rgba(6, 182, 212, 0.25) 0%, rgba(15, 23, 42, 0) 70%)',
+            pointerEvents: 'none'
+          }}></div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', color: '#38bdf8', fontSize: '0.82rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.85rem' }}>
+            <Sparkles size={16} />
+            <span>Our Founding Mission &bull; The Literature Island Paradox</span>
+          </div>
+
+          <h2 style={{ fontSize: '2.4rem', fontWeight: 800, color: '#ffffff', margin: '0 0 1.5rem 0', letterSpacing: '-0.02em', lineHeight: 1.25 }}>
+            Why We Built DrugDiscovery.Studio
+          </h2>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '2.5rem', marginBottom: '2.5rem' }}>
+            {/* Story Column 1: The 2:00 AM Reality & The Swanson Paradox */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', fontSize: '0.98rem', lineHeight: 1.7, color: '#cbd5e1' }}>
+              <p style={{ margin: 0, fontSize: '1.06rem', color: '#f8fafc', fontWeight: 500, lineHeight: 1.6 }}>
+                Behind the <strong>38.2 million papers</strong> indexed in PubMed is a reality that every clinician knows: a heartbroken parent sitting at a kitchen table at 2:00 AM, desperately scanning medical journals for an obscure clinical clue or repurposed compound that might save their child’s life.
+              </p>
+              <p style={{ margin: 0 }}>
+                In 1986, information scientist <strong>Don Swanson</strong> proved the <em>&ldquo;Undiscovered Public Knowledge&rdquo;</em> paradox: breakthroughs exist today, hidden in plain sight, simply because medical research is trapped in hyper-specialized silos. The biologist studying an ion channel in Poland has never read the paper by the pharmacologist studying an autoimmune pathway in Boston—yet their combined data contains the cure.
+              </p>
+              <p style={{ margin: 0 }}>
+                For 40 years, this paradox has plagued biomedicine. Human researchers read <strong>~250 papers a year</strong>. Meanwhile, <strong>3,000 new papers</strong> are published every single day.
+              </p>
+            </div>
+
+            {/* Story Column 2: Frontier AI as a Scientific Superpower */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', fontSize: '0.98rem', lineHeight: 1.7, color: '#cbd5e1' }}>
+              <p style={{ margin: 0 }}>
+                We realized that the fundamental associative nature of Frontier AI—often criticized as &ldquo;hallucination&rdquo;—is actually a <strong style={{ color: '#38bdf8' }}>superpower for novel scientific discovery</strong> when properly harnessed.
+              </p>
+              <p style={{ margin: 0 }}>
+                By grounding deep biochemical reasoning models in a high-speed causal knowledge graph of <strong>13.1 million verified empirical associations</strong> and cross-referencing live databases (ChEMBL 34, Open Targets, PubMed E-utilities), we can turn associative biological intuition into testable, mathematically scored, preclinical drug hypotheses in seconds.
+              </p>
+              
+              {/* Highlight Box */}
+              <div style={{
+                background: 'rgba(6, 182, 212, 0.08)',
+                border: '1px solid rgba(6, 182, 212, 0.3)',
+                borderRadius: '12px',
+                padding: '1.25rem 1.5rem',
+                marginTop: 'auto'
+              }}>
+                <div style={{ fontSize: '0.85rem', fontWeight: 800, color: '#38bdf8', marginBottom: '0.4rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                  <Zap size={15} />
+                  <span>The Core Mathematical Discovery Insight:</span>
+                </div>
+                <div style={{ fontSize: '0.88rem', color: '#e2e8f0', lineHeight: 1.5 }}>
+                  If Modality A links to Intermediate Biology B, and Biology B links to Disease C, but literature co-occurrence <strong>Direct(A, C) = 0</strong>, the transitive bridge <strong>A ➔ B ➔ C</strong> represents an unpatented, high-plausibility therapeutic breakthrough.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Bottom Quotation / Pledge Banner */}
+          <div style={{
+            background: 'linear-gradient(90deg, rgba(2, 132, 199, 0.25) 0%, rgba(99, 102, 241, 0.25) 100%)',
+            border: '1px solid rgba(56, 189, 248, 0.4)',
+            borderRadius: '16px',
+            padding: '1.75rem 2rem',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '1.5rem',
+            flexWrap: 'wrap'
+          }}>
+            <p style={{ margin: 0, fontSize: '1.05rem', fontWeight: 600, color: '#f0f9ff', lineHeight: 1.6, flex: 1, minWidth: '280px' }}>
+              &ldquo;We built DrugDiscovery.Studio because no cure should remain hidden just because two scientists never met, and no family should wait decades for discoveries that are already written.&rdquo;
+            </p>
+            <button
+              onClick={() => onLaunchApp()}
+              style={{
+                background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)',
+                color: '#ffffff',
+                border: 'none',
+                borderRadius: '10px',
+                padding: '0.85rem 1.6rem',
+                fontSize: '0.92rem',
+                fontWeight: 800,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                boxShadow: '0 4px 15px rgba(2, 132, 199, 0.4)',
+                whiteSpace: 'nowrap'
+              }}
+            >
+              <span>Explore Active Causal Graphs</span>
+              <ArrowRight size={16} />
+            </button>
           </div>
         </div>
       </section>
