@@ -2250,40 +2250,23 @@ export default function App() {
             {authIntentMessage || 'Sign in with your Google account or email to access AI literature discovery traversals and interactive target graphs.'}
           </p>
 
-          {/* Quick Access Pills for Verified Paid Accounts */}
-          <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
-            <button
-              type="button"
-              onClick={() => handleAuthenticate('michael.janis@gmail.com')}
-              style={{ background: '#ecfdf5', border: '1px solid #a7f3d0', color: '#047857', padding: '0.35rem 0.65rem', borderRadius: '6px', fontSize: '0.74rem', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.3rem' }}
-            >
-              <Sparkles size={12} />
-              <span>michael.janis@gmail.com (Pro)</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => handleAuthenticate('clee@oncotelic.com')}
-              style={{ background: '#ecfdf5', border: '1px solid #a7f3d0', color: '#047857', padding: '0.35rem 0.65rem', borderRadius: '6px', fontSize: '0.74rem', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.3rem' }}
-            >
-              <Sparkles size={12} />
-              <span>clee@oncotelic.com (Pro)</span>
-            </button>
-          </div>
-
           {/* Email / Lab Sign-In Form */}
           <form onSubmit={(e) => {
             e.preventDefault();
-            const inputEmail = customEmailInput.trim() || 'michael.janis@gmail.com';
-            handleAuthenticate(inputEmail);
+            const inputEmail = customEmailInput.trim();
+            if (inputEmail) {
+              handleAuthenticate(inputEmail);
+            }
           }} style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', background: '#f8fafc', border: '1px solid #cbd5e1', borderRadius: '8px', padding: '0.55rem 0.75rem', gap: '0.5rem' }}>
               <Mail size={16} style={{ color: '#64748b' }} />
               <input
                 type="email"
-                placeholder="yourname@gmail.com or scientist@institution.org"
+                placeholder="scientist@biopharma.org or yourname@gmail.com"
                 value={customEmailInput}
                 onChange={(e) => setCustomEmailInput(e.target.value)}
                 autoFocus
+                required
                 style={{ background: 'transparent', border: 'none', color: '#0f172a', fontSize: '0.88rem', width: '100%', outline: 'none' }}
               />
             </div>
@@ -2314,12 +2297,11 @@ export default function App() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
             <button
               onClick={async () => {
-                const target = customEmailInput.trim() || 'michael.janis@gmail.com';
-                const u = await loginWithGoogle(target);
+                const u = await loginWithGoogle();
                 if (u?.email) {
                   handleAuthenticate(u.email);
-                } else {
-                  handleAuthenticate(target);
+                } else if (customEmailInput.trim()) {
+                  handleAuthenticate(customEmailInput.trim());
                 }
               }}
               style={{
