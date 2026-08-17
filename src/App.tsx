@@ -9,6 +9,9 @@ import './App.css';
 import { fetchChEMBLMolecule, fetchOpenTargetsTarget, searchChEMBLMolecule } from './services/liveServices';
 import { loginWithGoogle, loginWithEmail, loginAsDemoScientist, logout, subscribeToAuthChanges } from './services/firebase';
 import { LandingPage } from './components/LandingPage';
+import { CsoCopilot } from './components/CsoCopilot';
+import { DiscoveryProgressHud } from './components/DiscoveryProgressHud';
+import { DocumentationModal } from './components/DocumentationModal';
 import { Logo } from './components/Logo';
 import { marked } from 'marked';
 
@@ -226,6 +229,8 @@ export default function App() {
   const [rightSidebarOpen, setRightSidebarOpen] = useState(false);
 
   // Onboarding Guide States
+  const [isCopilotOpen, setIsCopilotOpen] = useState<boolean>(false);
+  const [isDocumentationOpen, setIsDocumentationOpen] = useState<boolean>(false);
   const [showOnboarding, setShowOnboarding] = useState<boolean>(() => {
     try {
       const saved = localStorage.getItem('episteme_onboarding_completed');
@@ -2567,6 +2572,7 @@ export default function App() {
               executeSearch(preset.source, preset.target);
             }
           }}
+          onOpenDocs={() => setIsDocumentationOpen(true)}
           onOpenPricing={() => setIsPricingModalOpen(true)}
           onLogin={() => setIsAuthModalOpen(true)}
           authUser={authUser}
@@ -2631,11 +2637,34 @@ export default function App() {
 
           <button 
             className="row-btn" 
-            onClick={() => { setShowOnboarding(true); setOnboardingStep(1); }}
+            onClick={() => setIsDocumentationOpen(true)}
             style={{ fontSize: '0.72rem', padding: '0.3rem 0.65rem', display: 'flex', alignItems: 'center', gap: '0.35rem', background: 'rgba(255, 255, 255, 0.03)', borderColor: 'var(--border-color)', height: '1.8rem', borderRadius: '4px', cursor: 'pointer' }}
           >
             <Info size={13} style={{ color: 'var(--color-cyan)' }} />
             <span>User Guide</span>
+          </button>
+
+          <button 
+            className="row-btn" 
+            onClick={() => setIsCopilotOpen(true)}
+            style={{ 
+              fontSize: '0.72rem', 
+              padding: '0.3rem 0.75rem', 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: '0.35rem', 
+              background: 'linear-gradient(135deg, rgba(6,182,212,0.18) 0%, rgba(99,102,241,0.18) 100%)', 
+              border: '1px solid rgba(6, 182, 212, 0.45)', 
+              color: '#38bdf8',
+              height: '1.8rem', 
+              borderRadius: '4px', 
+              cursor: 'pointer',
+              fontWeight: 700,
+              boxShadow: '0 0 10px rgba(6, 182, 212, 0.2)'
+            }}
+          >
+            <Sparkles size={13} style={{ color: '#38bdf8' }} />
+            <span>Translational Bio-AI</span>
           </button>
 
           <button 
@@ -4044,9 +4073,83 @@ export default function App() {
         </div>
       )}
 
-      {/* Global Shared Modals */}
+      {/* Global Shared Modals & Bio-AI */}
       {renderAuthModal()}
       {renderPricingModal()}
+
+      {/* Scientific Documentation & User Guide Modal */}
+      <DocumentationModal
+        isOpen={isDocumentationOpen}
+        onClose={() => setIsDocumentationOpen(false)}
+        onLaunchPreset={(preset) => {
+          setSourceConcept(preset.source);
+          setTargetConcept(preset.target);
+          executeSearch(preset.source, preset.target);
+        }}
+      />
+
+      {/* Translational Bio-AI Companion */}
+      <CsoCopilot
+        isOpen={isCopilotOpen}
+        onClose={() => setIsCopilotOpen(false)}
+        clientContext={{
+          sourceConcept,
+          targetConcept,
+          selectedBTerm: selectedB?.word || selectedConcept?.name,
+          activeBTerms: swansonBList,
+          activeEvidence: [...(evidenceA || []), ...(evidenceC || [])],
+          chemblData,
+          otData,
+          ledgerSteps: historyTrail,
+          ledgerNotes: (rlhfInsights || []).map((r: any) => `[${r.status.toUpperCase()}] ${r.bTerm}: ${r.mechanism}`),
+          safetyCritique: aiProposal?.clinicalTranslational || aiProposal?.mechanismSummary,
+          openDiscoveryResult
+        }}
+        onAddToLedger={(note: string) => {
+          setRlhfInsights((prev: any) => [
+            ...prev,
+            {
+              id: 'note_' + Date.now(),
+              status: 'approved',
+              bTerm: selectedB?.word || sourceConcept || 'Insight',
+              mechanism: note
+            }
+          ]);
+        }}
+        onTriggerSearch={(s: string, t: string) => {
+          setSourceConcept(s);
+          setTargetConcept(t);
+          executeSearch(s, t);
+        }}
+      />
+
+      {/* Floating Bio-AI Trigger Button */}
+      {!isCopilotOpen && (
+        <button
+          onClick={() => setIsCopilotOpen(true)}
+          style={{
+            position: 'fixed',
+            bottom: '1.5rem',
+            right: '1.5rem',
+            zIndex: 900,
+            background: 'linear-gradient(135deg, #0284c7 0%, #6366f1 100%)',
+            color: 'white',
+            border: 'none',
+            borderRadius: '30px',
+            padding: '0.65rem 1.15rem',
+            fontSize: '0.85rem',
+            fontWeight: 700,
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            cursor: 'pointer',
+            boxShadow: '0 10px 25px -5px rgba(2, 132, 199, 0.5), 0 0 15px rgba(99, 102, 241, 0.4)'
+          }}
+        >
+          <Sparkles size={16} />
+          <span>Translational Bio-AI</span>
+        </button>
+      )}
 
     </div>
   );
