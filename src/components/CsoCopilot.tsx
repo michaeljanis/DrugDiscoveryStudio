@@ -175,6 +175,7 @@ export const CsoCopilot: React.FC<CsoCopilotProps> = ({
   };
 
   const promptShortcuts = [
+    { label: "🧭 What Does This Whole List Mean & What Next?", prompt: "From this whole list of intermediate B-terms, what does this all mean in the larger biological context? What are the convergent mechanistic axes, and what are the immediate experimental next steps (in-silico, in-vitro, in-vivo)?" },
     { label: "🔬 Critique Causal Plausibility & Whitespace", prompt: "Evaluate the biological and mechanistic plausibility of connecting Concept A to Concept C via our active intermediate B-terms. Why is direct literature co-occurrence currently zero, and does this represent viable patent whitespace?" },
     { label: "🧪 Design In-Vitro Assay Cascade", prompt: "Propose a structured, stage-gated preclinical assay cascade (CETSA target engagement, Surface Plasmon Resonance binding kinetics, cellular qPCR readout, and phenotypic viability IC50 endpoints) to validate this hypothesis in the wet lab." },
     { label: "🛡️ Screen Structure & Tox Liabilities", prompt: "Perform a rapid structure-activity relationship (SAR) and toxicological liability critique for this candidate modality (evaluating hERG cardiotoxicity, hepatotoxicity/CYP interactions, and BBB permeability)." },

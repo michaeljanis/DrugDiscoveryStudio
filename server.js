@@ -1008,10 +1008,7 @@ COMMUNICATION STYLE:
 
 
 app.post('/api/journal/review', async (req, res) => {
-  const { steps } = req.body;
-  if (!steps || !steps.length) {
-    return res.status(400).json({ error: 'No journal steps provided for review.' });
-  }
+  const { steps, notes, source, target } = req.body;
 
   const apiKey = process.env.GEMINI_API_KEY || "";
   if (!apiKey) {
@@ -1025,7 +1022,16 @@ app.post('/api/journal/review', async (req, res) => {
 
   try {
     const ai = new GoogleGenAI({ apiKey });
-    const chainSummary = steps.map((s, i) => `Step ${i + 1}: ${s.from} ➔ ${s.to} (${s.type || 'target'})`).join('\n');
+    let chainSummary = '';
+    if (steps && steps.length) {
+      chainSummary = steps.map((s, i) => `Step ${i + 1}: ${s.source || s.from || source || 'Compound'} ➔ ${s.bTerm || s.target || s.to || target || 'Target'}`).join('\n');
+    } else if (source && target) {
+      chainSummary = `Discovery Pathway: ${source} ➔ ${target}`;
+    } else if (notes && notes.length) {
+      chainSummary = `Hypothesis Notes:\n` + notes.join('\n');
+    } else {
+      chainSummary = `General therapeutic literature pathway`;
+    }
     
     const prompt = `Act as an expert biopharma research director, pharmacologist, and safety toxicologist.
 Evaluate the following exploratory hypothesis chain:

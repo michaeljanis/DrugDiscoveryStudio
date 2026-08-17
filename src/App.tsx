@@ -3457,6 +3457,70 @@ export default function App() {
           <aside className={`right-sidebar ${rightSidebarOpen ? 'open' : ''}`} style={{ display: 'flex', flexDirection: 'column' }}>
           <span className="panel-title">Hypothesis & Evidence Workbench</span>
           
+          {/* Executive Translation & Action Plan Card */}
+          <div style={{ padding: '0 0.25rem', marginBottom: '0.75rem' }}>
+            <div style={{ background: 'linear-gradient(135deg, rgba(6,182,212,0.12) 0%, rgba(99,102,241,0.12) 100%)', border: '1px solid rgba(6, 182, 212, 0.4)', borderRadius: '10px', padding: '0.85rem', display: 'flex', flexDirection: 'column', gap: '0.55rem', boxShadow: '0 4px 15px rgba(0,0,0,0.25)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                  <Sparkles size={15} style={{ color: '#38bdf8' }} />
+                  <span style={{ fontSize: '0.82rem', fontWeight: 800, color: 'white' }}>Executive Translation &amp; Action Plan</span>
+                </div>
+                <span style={{ fontSize: '0.65rem', background: 'rgba(6,182,212,0.2)', border: '1px solid rgba(6,182,212,0.4)', color: '#a5f3fc', padding: '0.1rem 0.4rem', borderRadius: '4px', fontWeight: 700 }}>
+                  AI Synthesis
+                </span>
+              </div>
+
+              <p style={{ margin: 0, fontSize: '0.74rem', color: '#cbd5e1', lineHeight: 1.5 }}>
+                {sourceConcept && targetConcept ? `Synthesize the convergent mechanistic axes for ${sourceConcept} ➔ ${targetConcept} and auto-generate stage-gated wet-lab validation protocols.` : 'Synthesize big-picture mechanistic axes and auto-generate stage-gated next steps.'}
+              </p>
+
+              <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
+                <button
+                  onClick={() => setIsCopilotOpen(true)}
+                  style={{
+                    flex: 1,
+                    background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '6px',
+                    padding: '0.45rem 0.65rem',
+                    fontSize: '0.74rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '0.35rem',
+                    boxShadow: '0 2px 8px rgba(2,132,199,0.3)'
+                  }}
+                >
+                  <Bot size={13} />
+                  <span>🧭 What Does This Mean? (Big Picture)</span>
+                </button>
+
+                <button
+                  onClick={() => setIsJournalOpen(true)}
+                  style={{
+                    background: 'rgba(255,255,255,0.06)',
+                    color: '#e2e8f0',
+                    border: '1px solid rgba(255,255,255,0.15)',
+                    borderRadius: '6px',
+                    padding: '0.45rem 0.65rem',
+                    fontSize: '0.74rem',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.35rem'
+                  }}
+                >
+                  <FileText size={13} style={{ color: '#34d399' }} />
+                  <span>Journal ({journalSteps.length + journalNotes.length})</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
           {selectedConcept ? (
             <div className="hypothesis-list" style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               
@@ -3854,13 +3918,24 @@ export default function App() {
                   </div>
                   <button
                     onClick={async () => {
-                      if (!journalSteps.length) return;
                       setIsReviewingJournal(true);
                       try {
+                        const fallbackSteps = journalSteps.length ? journalSteps : [{
+                          source: sourceConcept || 'Compound',
+                          bTerm: selectedB?.word || selectedConcept?.name || 'Target Pathway',
+                          target: targetConcept || 'Disease Indication',
+                          score: 0.95,
+                          timestamp: new Date().toLocaleTimeString()
+                        }];
                         const res = await fetch('/api/journal/review', {
                           method: 'POST',
                           headers: { 'Content-Type': 'application/json' },
-                          body: JSON.stringify({ steps: journalSteps })
+                          body: JSON.stringify({ 
+                            steps: fallbackSteps,
+                            notes: journalNotes,
+                            source: sourceConcept,
+                            target: targetConcept
+                          })
                         });
                         const data = await res.json();
                         setAiReviewResult(data);
@@ -3870,11 +3945,11 @@ export default function App() {
                         setIsReviewingJournal(false);
                       }
                     }}
-                    disabled={isReviewingJournal || !journalSteps.length}
+                    disabled={isReviewingJournal}
                     className="row-btn"
-                    style={{ fontSize: '0.72rem', padding: '0.25rem 0.6rem', color: 'var(--color-cyan)', borderColor: 'rgba(6,182,212,0.4)' }}
+                    style={{ fontSize: '0.72rem', padding: '0.25rem 0.6rem', color: 'var(--color-cyan)', borderColor: 'rgba(6,182,212,0.4)', cursor: 'pointer' }}
                   >
-                    {isReviewingJournal ? 'Evaluating...' : '🤖 Run AI Safety Screen'}
+                    {isReviewingJournal ? 'Evaluating Safety...' : '🛡️ Run AI Safety Screen'}
                   </button>
                 </div>
 
@@ -4096,15 +4171,19 @@ export default function App() {
           openDiscoveryResult
         }}
         onAddToLedger={(note: string) => {
-          setRlhfInsights((prev: any) => [
-            ...prev,
-            {
-              id: 'note_' + Date.now(),
-              status: 'approved',
-              bTerm: selectedB?.word || sourceConcept || 'Insight',
-              mechanism: note
-            }
-          ]);
+          const newStep: JournalStep = {
+            from: sourceConcept || 'Compound A',
+            to: selectedB?.word || selectedConcept?.name || targetConcept || 'Target C',
+            type: 'Translational Bio-AI Insight',
+            citationsA: 1,
+            citationsC: 1,
+            score: 0.99,
+            rationale: note,
+            timestamp: new Date().toLocaleTimeString()
+          };
+          setJournalSteps(prev => [...prev, newStep]);
+          setJournalNotes(prev => [...prev, note]);
+          setIsJournalOpen(true);
         }}
         onTriggerSearch={(s: string, t: string) => {
           setSourceConcept(s);
