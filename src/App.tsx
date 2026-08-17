@@ -230,6 +230,7 @@ export default function App() {
 
   // Onboarding Guide States
   const [isCopilotOpen, setIsCopilotOpen] = useState<boolean>(false);
+  const [copilotInitialPrompt, setCopilotInitialPrompt] = useState<string | null>(null);
   const [isDocumentationOpen, setIsDocumentationOpen] = useState<boolean>(false);
   const [showOnboarding, setShowOnboarding] = useState<boolean>(() => {
     try {
@@ -4156,7 +4157,12 @@ export default function App() {
       {/* Translational Bio-AI Companion */}
       <CsoCopilot
         isOpen={isCopilotOpen}
-        onClose={() => setIsCopilotOpen(false)}
+        onClose={() => {
+          setIsCopilotOpen(false);
+          setCopilotInitialPrompt(null);
+        }}
+        initialPrompt={copilotInitialPrompt}
+        onClearInitialPrompt={() => setCopilotInitialPrompt(null)}
         clientContext={{
           sourceConcept,
           targetConcept,

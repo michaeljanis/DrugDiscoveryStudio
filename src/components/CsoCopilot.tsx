@@ -16,6 +16,8 @@ interface Message {
 interface CsoCopilotProps {
   isOpen: boolean;
   onClose: () => void;
+  initialPrompt?: string | null;
+  onClearInitialPrompt?: () => void;
   clientContext: {
     sourceConcept?: string;
     targetConcept?: string;
@@ -36,6 +38,8 @@ interface CsoCopilotProps {
 export const CsoCopilot: React.FC<CsoCopilotProps> = ({
   isOpen,
   onClose,
+  initialPrompt,
+  onClearInitialPrompt,
   clientContext,
   onAddToLedger,
   onTriggerSearch
@@ -65,7 +69,64 @@ export const CsoCopilot: React.FC<CsoCopilotProps> = ({
     }
   }, [messages, isOpen]);
 
+  // Auto-run initialPrompt if provided
+  useEffect(() => {
+    if (isOpen && initialPrompt && initialPrompt.trim()) {
+      handleSendMessage(initialPrompt.trim());
+      if (onClearInitialPrompt) onClearInitialPrompt();
+    }
+  }, [isOpen, initialPrompt]);
+
   if (!isOpen) return null;
+
+  // Clean LaTeX and raw markup to beautiful Unicode / HTML
+  const formatBioContent = (rawText: string) => {
+    if (!rawText) return '';
+    let cleaned = rawText;
+
+    // Convert common raw LaTeX tokens to clean Unicode
+    cleaned = cleaned.replace(/\\text\{([^}]+)\}/g, '$1');
+    cleaned = cleaned.replace(/\\longrightarrow|\\rightarrow|\\xrightarrow\{[^}]*\}/g, ' ➔ ');
+    cleaned = cleaned.replace(/\\uparrow/g, '↑');
+    cleaned = cleaned.replace(/\\downarrow/g, '↓');
+    cleaned = cleaned.replace(/\\alpha/g, 'α');
+    cleaned = cleaned.replace(/\\beta/g, 'β');
+    cleaned = cleaned.replace(/\\gamma/g, 'γ');
+    cleaned = cleaned.replace(/\\kappa/g, 'κ');
+    cleaned = cleaned.replace(/\\quad|\\;|\\,/g, ' ');
+    cleaned = cleaned.replace(/\$\$(.*?)\$\$/gs, (_match, p1) => `**${p1.trim()}**`);
+    cleaned = cleaned.replace(/\$(.*?)\$/g, (_match, p1) => `*${p1.trim()}*`);
+
+    // Ensure raw ASCII tree diagrams with ┌, └, │, ──> are wrapped in code blocks if not already
+    if ((cleaned.includes('┌') || cleaned.includes('├──') || cleaned.includes('└──')) && !cleaned.includes('```')) {
+      const lines = cleaned.split('\n');
+      let inDiagram = false;
+      const resultLines: string[] = [];
+      for (const line of lines) {
+        if (line.includes('┌') || line.includes('├──') || line.includes('└──') || line.includes('│')) {
+          if (!inDiagram) {
+            resultLines.push('```');
+            inDiagram = true;
+          }
+          resultLines.push(line);
+        } else {
+          if (inDiagram) {
+            resultLines.push('```');
+            inDiagram = false;
+          }
+          resultLines.push(line);
+        }
+      }
+      if (inDiagram) resultLines.push('```');
+      cleaned = resultLines.join('\n');
+    }
+
+    try {
+      return marked.parse(cleaned) as string;
+    } catch {
+      return cleaned;
+    }
+  };
 
   const handleSendMessage = async (textToSend?: string) => {
     const query = textToSend || inputValue.trim();
@@ -326,7 +387,8 @@ export const CsoCopilot: React.FC<CsoCopilotProps> = ({
                   <div>{m.content}</div>
                 ) : (
                   <div 
-                    dangerouslySetInnerHTML={{ __html: marked.parse(m.content) as string }} 
+                    className="bio-markdown-body"
+                    dangerouslySetInnerHTML={{ __html: formatBioContent(m.content) }} 
                     style={{ overflowX: 'auto' }}
                   />
                 )}

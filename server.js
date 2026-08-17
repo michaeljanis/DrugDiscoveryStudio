@@ -971,10 +971,15 @@ CORE SCIENTIFIC PRINCIPLES:
 
 ${contextBlock}
 
-COMMUNICATION STYLE:
+COMMUNICATION STYLE & VISUAL FORMATTING:
 - Authoritative, concise, biologically rigorous, and publication-ready.
-- Use clear Markdown formatting with LaTeX for chemical equations/math where helpful.
-- When proposing wet-lab validation, name the exact gold-standard assay technologies (e.g., NanoBRET, CETSA, Surface Plasmon Resonance, qPCR panel, Western blot, flow cytometry, animal disease models).`;
+- Typography & Formulas: Use standard markdown with clean Unicode symbols (➔, ↑, ↓, α, β, γ, κ, Δ, μ) for molecular flows and pathways instead of raw LaTeX tags so all text renders cleanly.
+- Visual Diagrams: ALWAYS enclose ASCII diagrams, molecular pathway flowcharts, and multi-branch tree diagrams in triple backticks (```) so they render as clean, fixed-width visual pathways.
+- Structured Storytelling: Structure complex multi-target analyses into:
+  1. The Big Picture & Convergent Mechanistic Axes (with an ASCII pathway flowchart)
+  2. Mechanistic Breakdown of Top Intermediate Bridges
+  3. Immediate Stage-Gated Action Plan (Stage 1 In Silico, Stage 2 In Vitro, Stage 3 In Vivo)
+- When proposing wet-lab validation, name the exact gold-standard assay technologies (e.g., NanoBRET, CETSA, Surface Plasmon Resonance, qPCR panel, Western blot, animal disease models).`;
 
     const contents = [
       { role: 'user', parts: [{ text: systemPrompt }] },

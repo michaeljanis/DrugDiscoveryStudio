@@ -2803,3 +2803,59 @@
   max-width: 95vw !important;
   box-sizing: border-box !important;
 }
+
+/* AI Markdown & Graphical Diagram Typography */
+.bio-markdown-body pre,
+.modal-content pre,
+.hypothesis-card pre {
+  background: #020617 !important;
+  border: 1px solid rgba(6, 182, 212, 0.35) !important;
+  border-radius: 8px !important;
+  padding: 0.85rem 1rem !important;
+  font-family: 'JetBrains Mono', 'Fira Code', 'Roboto Mono', 'SFMono-Regular', Consolas, Menlo, monospace !important;
+  font-size: 0.78rem !important;
+  line-height: 1.45 !important;
+  color: #38bdf8 !important;
+  overflow-x: auto !important;
+  white-space: pre !important;
+  margin: 0.6rem 0 !important;
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.4) !important;
+}
+
+.bio-markdown-body code,
+.modal-content code {
+  font-family: 'JetBrains Mono', 'Fira Code', 'Roboto Mono', 'SFMono-Regular', Consolas, Menlo, monospace !important;
+  background: rgba(6, 182, 212, 0.12) !important;
+  color: #38bdf8 !important;
+  padding: 0.15rem 0.35rem !important;
+  border-radius: 4px !important;
+  font-size: 0.82em !important;
+}
+
+.bio-markdown-body strong {
+  color: #f8fafc !important;
+  font-weight: 700 !important;
+}
+
+.bio-markdown-body ul, 
+.bio-markdown-body ol {
+  padding-left: 1.25rem !important;
+  margin: 0.4rem 0 !important;
+}
+
+.bio-markdown-body li {
+  margin-bottom: 0.35rem !important;
+  color: #cbd5e1 !important;
+}
+
+.bio-markdown-body h1, 
+.bio-markdown-body h2, 
+.bio-markdown-body h3, 
+.bio-markdown-body h4 {
+  color: #ffffff !important;
+  margin-top: 0.85rem !important;
+  margin-bottom: 0.4rem !important;
+  font-weight: 800 !important;
+  letter-spacing: -0.01em !important;
+}
+
