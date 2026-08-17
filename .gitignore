@@ -34,3 +34,7 @@ pubmed_data/
 *.tar.gz
 *.zip
 scratch/
+
+# Environment variables
+.env
+.env.*

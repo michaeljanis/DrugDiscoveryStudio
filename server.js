@@ -14,8 +14,15 @@ const app = express();
 app.use(express.json());
 
 // ----------------- STRIPE & GOOGLE PAY BILLING ENGINE -----------------
-const stripeKey = process.env.STRIPE_SECRET_KEY || process.env.STRIPE_SECRET_KEY || '';
-const stripe = new Stripe(stripeKey, { apiVersion: '2023-10-16' });
+const stripeKey = process.env.STRIPE_SECRET_KEY || '';
+let stripe = null;
+if (stripeKey) {
+  try {
+    stripe = new Stripe(stripeKey, { apiVersion: '2023-10-16' });
+  } catch (e) {
+    console.warn('Stripe init warning:', e);
+  }
+}
 
 // Persistent file-backed customer tier registry
 const SUBSCRIBERS_FILE = path.join(__dirname, 'subscribers.json');
@@ -58,6 +65,7 @@ const saveSubscribers = () => {
 
 // API to create a Stripe Checkout Session with Google Pay / Apple Pay / Card support
 app.post('/api/billing/create-checkout-session', async (req, res) => {
+  if (!stripe) { return res.status(503).json({ error: 'Stripe billing is currently in offline configuration.' }); }
   try {
     const { plan, userId, userEmail, returnUrl } = req.body;
     const origin = returnUrl || req.headers.referer || 'https://drugdiscovery.studio';
