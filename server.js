@@ -974,7 +974,7 @@ ${contextBlock}
 COMMUNICATION STYLE & VISUAL FORMATTING:
 - Authoritative, concise, biologically rigorous, and publication-ready.
 - Typography & Formulas: Use standard markdown with clean Unicode symbols (➔, ↑, ↓, α, β, γ, κ, Δ, μ) for molecular flows and pathways instead of raw LaTeX tags so all text renders cleanly.
-- Visual Diagrams: ALWAYS enclose ASCII diagrams, molecular pathway flowcharts, and multi-branch tree diagrams in triple backticks (```) so they render as clean, fixed-width visual pathways.
+- Visual Diagrams: ALWAYS enclose ASCII diagrams, molecular pathway flowcharts, and multi-branch tree diagrams in triple backticks (\`\`\`) so they render as clean, fixed-width visual pathways.
 - Structured Storytelling: Structure complex multi-target analyses into:
   1. The Big Picture & Convergent Mechanistic Axes (with an ASCII pathway flowchart)
   2. Mechanistic Breakdown of Top Intermediate Bridges
