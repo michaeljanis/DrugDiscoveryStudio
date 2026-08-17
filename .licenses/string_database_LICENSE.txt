@@ -1,0 +1,4 @@
+STRING Database License Notice
+Timestamp: 2026-08-16T00:30:25-07:00
+Terms: Please review the access terms and licensing details at https://string-db.org/cgi/access
+Academic and educational use is free. Commercial usage may require licensing.

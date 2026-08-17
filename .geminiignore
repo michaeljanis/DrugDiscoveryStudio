@@ -1,0 +1,14 @@
+# Prevent AI agents & IDE scanners from ingesting huge DBs & builds
+node_modules/**
+dist/**
+pubmed_data/*.db
+pubmed_data/*.db-wal
+pubmed_data/*.db-shm
+pubmed_data/baseline/**
+*.tar.gz
+*.zip
+*.png
+*.jpg
+*.jpeg
+*.mp4
+*.MOV

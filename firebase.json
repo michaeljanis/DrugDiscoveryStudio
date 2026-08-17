@@ -1,0 +1,16 @@
+{
+  "auth": {
+    "providers": {
+      "anonymous": true,
+      "emailPassword": true,
+      "googleSignIn": {
+        "oAuthBrandDisplayName": "Episteme LBD",
+        "supportEmail": "support@example.com",
+        "authorizedRedirectUris": [
+          "https://episteme-629507856227.us-central1.run.app",
+          "http://localhost"
+        ]
+      }
+    }
+  }
+}

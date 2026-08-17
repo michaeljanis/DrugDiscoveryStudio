@@ -1,0 +1,2 @@
+Notification: Data accessed from ClinicalTrials.gov API v2. Users are advised to review and comply with the terms of use at https://clinicaltrials.gov/about-site/terms-conditions.
+Timestamp: 2026-08-16T00:32:45-07:00

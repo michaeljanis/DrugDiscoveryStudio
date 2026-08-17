@@ -1,0 +1,17 @@
+steps:
+  # Step 1: Download the SQLite database from GCS
+  - name: 'gcr.io/cloud-builders/gsutil'
+    args: ['cp', 'gs://episteme-data-629507856227/pubmed_graph.db', 'pubmed_data/pubmed_graph.db']
+
+  # Step 2: Build the Docker image containing the database
+  - name: 'gcr.io/cloud-builders/docker'
+    args: [
+      'build',
+      '-f', 'Dockerfile.db',
+      '-t', 'gcr.io/$PROJECT_ID/episteme-db-base:latest',
+      '.'
+    ]
+
+# Automatically push the built image to Container Registry
+images:
+  - 'gcr.io/$PROJECT_ID/episteme-db-base:latest'

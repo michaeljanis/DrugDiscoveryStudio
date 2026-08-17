@@ -1,0 +1,7 @@
+OpenFDA Database License Notice
+Timestamp: 2026-08-16T00:31:30-07:00
+
+Data provided by the U.S. Food and Drug Administration (FDA) through openFDA.
+Please review the licensing terms and API terms of service:
+- Terms of Service: https://open.fda.gov/apis/
+- License: https://open.fda.gov/license/

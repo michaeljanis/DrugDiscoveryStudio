@@ -1,0 +1,13 @@
+steps:
+  # Step 1: Build the Docker image (DB is now inherited from base image)
+  - name: 'gcr.io/cloud-builders/docker'
+    args: [
+      'build',
+      '--build-arg', 'PROJECT_ID=$PROJECT_ID',
+      '-t', 'gcr.io/$PROJECT_ID/episteme:latest',
+      '.'
+    ]
+
+# Automatically push the built image to Container Registry
+images:
+  - 'gcr.io/$PROJECT_ID/episteme:latest'
