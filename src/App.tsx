@@ -2994,6 +2994,14 @@ export default function App() {
         {/* Center Panel: Main Workspace */}
         <main className="center-workspace" style={{ background: 'var(--bg-primary)', position: 'relative', display: 'flex', flexDirection: 'column' }}>
 
+          {/* Multi-Stage Discovery Progress HUD Overlay */}
+          <DiscoveryProgressHud
+            isSearching={isSearching}
+            isOpenDiscoveryLoading={isOpenDiscoveryLoading}
+            sourceConcept={sourceConcept}
+            targetConcept={targetConcept}
+          />
+
           {/* Breadcrumb Journey Header */}
           {hypothesisBreadcrumbs.length > 0 && (
             <div style={{ background: 'rgba(15, 23, 42, 0.95)', borderBottom: '1px solid var(--border-color)', padding: '0.6rem 1.25rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
