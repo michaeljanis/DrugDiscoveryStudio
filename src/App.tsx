@@ -3,7 +3,7 @@ import {
   Loader2, Zap, Compass, Activity,  
   ArrowRight, BrainCircuit, RefreshCw, Maximize2, Minimize2,
   ZoomIn, ZoomOut, Info, Layers2, FileText, ChevronRight, ChevronLeft,
-  Sparkles, Check, Building, User, Mail, Menu, X, Bot, Award, Lock, CreditCard
+  Sparkles, Check, Building, User, Mail, Menu, X, Bot, Award, Lock, CreditCard, Bell
 } from 'lucide-react';
 import './App.css';
 import { fetchChEMBLMolecule, fetchOpenTargetsTarget, searchChEMBLMolecule } from './services/liveServices';
@@ -232,6 +232,50 @@ export default function App() {
   const [isCopilotOpen, setIsCopilotOpen] = useState<boolean>(false);
   const [copilotInitialPrompt, setCopilotInitialPrompt] = useState<string | null>(null);
   const [isDocumentationOpen, setIsDocumentationOpen] = useState<boolean>(false);
+  const [documentationInitialTab, setDocumentationInitialTab] = useState<string>('quickstart');
+
+  interface NotificationItem {
+    id: string;
+    title: string;
+    message: string;
+    timestamp: string;
+    type: string;
+    read: boolean;
+  }
+  const [notifications, setNotifications] = useState<NotificationItem[]>([]);
+  const [isNotifDropdownOpen, setIsNotifDropdownOpen] = useState<boolean>(false);
+
+  const fetchNotifications = async () => {
+    try {
+      const uEmail = authUser?.email || '';
+      const res = await fetch(`/api/notifications?email=${encodeURIComponent(uEmail)}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.notifications) setNotifications(data.notifications);
+      }
+    } catch (e) {
+      console.warn("Failed to fetch notifications", e);
+    }
+  };
+
+  useEffect(() => {
+    fetchNotifications();
+    const notifInterval = setInterval(fetchNotifications, 30000);
+    return () => clearInterval(notifInterval);
+  }, [authUser]);
+
+  const handleMarkNotifRead = async (id: string) => {
+    try {
+      await fetch('/api/notifications/mark-read', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id })
+      });
+      setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
+    } catch (e) {
+      console.warn("Failed to mark notif read", e);
+    }
+  };
   const [showOnboarding, setShowOnboarding] = useState<boolean>(() => {
     try {
       const saved = localStorage.getItem('episteme_onboarding_completed');
@@ -2620,11 +2664,26 @@ export default function App() {
 
           <button 
             className="row-btn" 
-            onClick={() => setIsDocumentationOpen(true)}
+            onClick={() => {
+              setDocumentationInitialTab('quickstart');
+              setIsDocumentationOpen(true);
+            }}
             style={{ fontSize: '0.72rem', padding: '0.3rem 0.65rem', display: 'flex', alignItems: 'center', gap: '0.35rem', background: 'rgba(255, 255, 255, 0.03)', borderColor: 'var(--border-color)', height: '1.8rem', borderRadius: '4px', cursor: 'pointer' }}
           >
             <Info size={13} style={{ color: 'var(--color-cyan)' }} />
-            <span>User Guide</span>
+            <span>Help &amp; Guide</span>
+          </button>
+
+          <button 
+            className="row-btn" 
+            onClick={() => {
+              setDocumentationInitialTab('feedback');
+              setIsDocumentationOpen(true);
+            }}
+            style={{ fontSize: '0.72rem', padding: '0.3rem 0.65rem', display: 'flex', alignItems: 'center', gap: '0.35rem', background: 'rgba(255, 255, 255, 0.03)', borderColor: 'var(--border-color)', height: '1.8rem', borderRadius: '4px', cursor: 'pointer' }}
+          >
+            <Sparkles size={13} style={{ color: 'var(--color-purple)' }} />
+            <span>Scientist Feedback</span>
           </button>
 
           <button 
@@ -2646,18 +2705,97 @@ export default function App() {
               boxShadow: '0 0 10px rgba(6, 182, 212, 0.2)'
             }}
           >
-            <Sparkles size={13} style={{ color: '#38bdf8' }} />
+            <Bot size={13} style={{ color: '#38bdf8' }} />
             <span>Translational Bio-AI</span>
           </button>
 
-          <button 
-            className="row-btn" 
-            onClick={() => setIsFeedbackModalOpen(true)}
-            style={{ fontSize: '0.72rem', padding: '0.3rem 0.65rem', display: 'flex', alignItems: 'center', gap: '0.35rem', background: 'rgba(255, 255, 255, 0.03)', borderColor: 'var(--border-color)', height: '1.8rem', borderRadius: '4px', cursor: 'pointer' }}
-          >
-            <Bot size={13} style={{ color: 'var(--color-purple)' }} />
-            <span>Feedback</span>
-          </button>
+          {/* Notification Bell with Dropdown */}
+          <div style={{ position: 'relative' }}>
+            <button
+              className="row-btn"
+              onClick={() => setIsNotifDropdownOpen(!isNotifDropdownOpen)}
+              style={{
+                fontSize: '0.72rem',
+                padding: '0.3rem 0.55rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.3rem',
+                background: 'rgba(255, 255, 255, 0.03)',
+                borderColor: 'var(--border-color)',
+                height: '1.8rem',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                color: notifications.some(n => !n.read) ? '#38bdf8' : 'var(--text-muted)'
+              }}
+              title="System & Account Notifications"
+            >
+              <Bell size={13} />
+              {notifications.filter(n => !n.read).length > 0 && (
+                <span style={{
+                  background: '#0284c7',
+                  color: 'white',
+                  fontSize: '0.62rem',
+                  fontWeight: 800,
+                  borderRadius: '10px',
+                  padding: '0.05rem 0.35rem',
+                  lineHeight: 1
+                }}>
+                  {notifications.filter(n => !n.read).length}
+                </span>
+              )}
+            </button>
+
+            {isNotifDropdownOpen && (
+              <div style={{
+                position: 'absolute',
+                top: 'calc(100% + 8px)',
+                right: 0,
+                width: '320px',
+                background: '#0f172a',
+                border: '1px solid rgba(6, 182, 212, 0.35)',
+                borderRadius: '10px',
+                padding: '0.75rem',
+                boxShadow: '0 20px 40px rgba(0,0,0,0.8), 0 0 20px rgba(6, 182, 212, 0.2)',
+                zIndex: 1100,
+                color: '#ffffff'
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem', borderBottom: '1px solid rgba(255,255,255,0.08)', paddingBottom: '0.4rem' }}>
+                  <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#f8fafc' }}>Notifications &amp; Release Feed</span>
+                  <span style={{ fontSize: '0.68rem', color: '#94a3b8' }}>{notifications.length} Total</span>
+                </div>
+                <div style={{ maxHeight: '260px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                  {notifications.length === 0 ? (
+                    <div style={{ fontSize: '0.75rem', color: '#64748b', textAlign: 'center', padding: '1rem' }}>
+                      No notifications yet.
+                    </div>
+                  ) : (
+                    notifications.map(n => (
+                      <div
+                        key={n.id}
+                        onClick={() => handleMarkNotifRead(n.id)}
+                        style={{
+                          background: n.read ? 'rgba(255,255,255,0.02)' : 'rgba(6, 182, 212, 0.08)',
+                          border: n.read ? '1px solid rgba(255,255,255,0.05)' : '1px solid rgba(6, 182, 212, 0.3)',
+                          borderRadius: '6px',
+                          padding: '0.55rem 0.65rem',
+                          cursor: 'pointer',
+                          fontSize: '0.74rem'
+                        }}
+                      >
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.2rem' }}>
+                          <span style={{ fontWeight: 700, color: n.read ? '#cbd5e1' : '#38bdf8' }}>{n.title}</span>
+                          <span style={{ fontSize: '0.65rem', color: '#64748b' }}>{n.timestamp}</span>
+                        </div>
+                        <p style={{ margin: 0, color: n.read ? '#94a3b8' : '#e2e8f0', fontSize: '0.72rem', lineHeight: 1.4 }}>
+                          {n.message}
+                        </p>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
 
           <button 
             className="row-btn" 

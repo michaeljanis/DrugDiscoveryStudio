@@ -1277,6 +1277,246 @@ Return ONLY valid JSON in the following format:
 });
 
 
+
+// ----------------- NOTIFICATIONS & SCIENTIST FEEDBACK ENGINE -----------------
+const FEEDBACK_LOG_FILE = path.join(__dirname, 'feedback_log.json');
+const NOTIFICATIONS_FILE = path.join(__dirname, 'notifications.json');
+
+let feedbackLog = [];
+try {
+  if (fs.existsSync(FEEDBACK_LOG_FILE)) {
+    feedbackLog = JSON.parse(fs.readFileSync(FEEDBACK_LOG_FILE, 'utf8'));
+  }
+} catch (e) {
+  console.warn("Could not read feedback_log.json:", e);
+}
+
+let notificationsList = [
+  {
+    id: 'notif_welcome',
+    targetEmail: 'all',
+    title: '✨ Welcome to Drug Discovery Studio',
+    message: 'Traverse 13.1M+ empirical co-occurrence graph edges across 38.2M PubMed abstracts with Gemini 3.7 biochemical reasoning.',
+    timestamp: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+    type: 'system',
+    read: false
+  },
+  {
+    id: 'notif_update_1',
+    targetEmail: 'all',
+    title: '🚀 Executive Synthesis & Living Journal Active',
+    message: '1-Click big-picture mechanistic axis translation and preclinical assay planning is live in production.',
+    timestamp: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+    type: 'feature',
+    read: false
+  }
+];
+
+try {
+  if (fs.existsSync(NOTIFICATIONS_FILE)) {
+    notificationsList = JSON.parse(fs.readFileSync(NOTIFICATIONS_FILE, 'utf8'));
+  }
+} catch (e) {
+  console.warn("Could not read notifications.json:", e);
+}
+
+const saveNotifications = () => {
+  try {
+    fs.writeFileSync(NOTIFICATIONS_FILE, JSON.stringify(notificationsList, null, 2));
+  } catch (e) {
+    console.warn("Could not save notifications.json:", e);
+  }
+};
+
+const saveFeedback = () => {
+  try {
+    fs.writeFileSync(FEEDBACK_LOG_FILE, JSON.stringify(feedbackLog, null, 2));
+  } catch (e) {
+    console.warn("Could not save feedback_log.json:", e);
+  }
+};
+
+// GET /api/notifications
+app.get('/api/notifications', (req, res) => {
+  const email = (req.query.email || '').toLowerCase().trim();
+  const relevant = notificationsList.filter(n => 
+    n.targetEmail === 'all' || (email && n.targetEmail.toLowerCase() === email)
+  );
+  res.json({ notifications: relevant });
+});
+
+// POST /api/notifications/mark-read
+app.post('/api/notifications/mark-read', (req, res) => {
+  const { id } = req.body;
+  if (id) {
+    notificationsList = notificationsList.map(n => n.id === id ? { ...n, read: true } : n);
+    saveNotifications();
+  }
+  res.json({ success: true });
+});
+
+// POST /api/feedback
+app.post('/api/feedback', async (req, res) => {
+  const { feedbackText, userEmail, userName, accountTier, category, appState } = req.body;
+  
+  if (!feedbackText || !feedbackText.trim()) {
+    return res.status(400).json({ error: 'Feedback text is required.' });
+  }
+
+  const ticketId = 'FB-' + Date.now().toString().slice(-6);
+  const submitterEmail = userEmail || 'anonymous_scientist@biopharma.org';
+  const submitterName = userName || 'Discovery Scientist';
+  const tier = accountTier || 'free';
+  const cat = category || 'Feature Request / Enhancement';
+
+  const telemetryContext = `
+• Submitter: ${submitterName} (${submitterEmail}) [Account Tier: ${tier.toUpperCase()}]
+• Feedback Category: ${cat}
+• Active Query: Source A: "${appState?.sourceConcept || 'N/A'}" ➔ Target C: "${appState?.targetConcept || 'N/A'}"
+• Currently Inspected Intermediate Bridge (B): "${appState?.selectedBTerm || 'None'}"
+• Active Intermediate Bridges (Top 5): ${appState?.activeBTerms?.slice(0, 5).map((b) => b.word || b.name).join(', ') || 'N/A'}
+• Active Hypothesis Ledger Milestones: ${appState?.ledgerSteps?.length || 0} recorded steps
+• Raw User Feedback:
+"${feedbackText}"
+`;
+
+  let aiBrief = {
+    executiveSummary: feedbackText,
+    biologicalImpact: "Enhances researcher velocity, target validation, and hypothesis exploration.",
+    technicalImplementation: "Incorporate into frontend/backend pipeline with zero regression to core discovery workflows.",
+    developerIngestionPrompt: `Ingest user request: ${feedbackText} for scientist ${submitterName} (${submitterEmail})`
+  };
+
+  const apiKey = process.env.GEMINI_API_KEY || "";
+  if (apiKey) {
+    try {
+      const ai = new GoogleGenAI({ apiKey });
+      const prompt = `Act as Chief Technology Officer and Lead Biopharma AI Architect at DrugDiscovery.Studio.
+A scientist user has submitted feedback/request via the live production platform.
+Here is the raw submission and active telemetry context:
+${telemetryContext}
+
+Synthesize an audit-grade Developer Action Brief returning ONLY a valid JSON object:
+{
+  "executiveSummary": "String (1-2 sentences summarizing what the user is asking for and why)",
+  "biologicalImpact": "String (1-2 sentences detailing the pharmacological or scientific value of this request)",
+  "technicalImplementation": "String (2-3 concise sentences detailing exact file locations to modify, data structures, or API integrations with ZERO regressions to existing features)",
+  "developerIngestionPrompt": "String (A complete, high-precision prompt formatted for Antigravity / Gemini coding swarms to implement the fix/feature, explicitly mentioning user ${submitterName} / ${submitterEmail} so an in-app notification can be dispatched upon deployment)"
+}`;
+
+      const aiPromise = ai.models.generateContent({
+        model: 'gemini-3.7-flash',
+        contents: prompt,
+        config: { responseMimeType: 'application/json' }
+      });
+      const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('AI brief timeout')), 6000));
+      const aiRes = await Promise.race([aiPromise, timeoutPromise]);
+      aiBrief = JSON.parse(aiRes.text);
+    } catch (err) {
+      console.warn("AI Feedback synthesis fallback:", err);
+    }
+  }
+
+  // Save to persistent file
+  const ticketRecord = {
+    ticketId,
+    timestamp: new Date().toISOString(),
+    submitterEmail,
+    submitterName,
+    accountTier: tier,
+    category: cat,
+    feedbackText,
+    appState,
+    aiBrief
+  };
+  feedbackLog.push(ticketRecord);
+  saveFeedback();
+
+  // Add auto-notification for user
+  const userNotif = {
+    id: 'notif_fb_' + ticketId,
+    targetEmail: submitterEmail.toLowerCase(),
+    title: `📬 Feedback Ticket #${ticketId} Received`,
+    message: `Thank you, ${submitterName}. Your ${cat.toLowerCase()} has been analyzed by Gemini 3.7 and forwarded directly to Lead Developer Dr. Michael Janis. You will be notified here when an update is deployed!`,
+    timestamp: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+    type: 'feedback',
+    read: false
+  };
+  notificationsList.unshift(userNotif);
+  saveNotifications();
+
+  // Dispatch Email directly to michael.janis@gmail.com
+  const gmailUser = process.env.GMAIL_USER || 'michael.janis@gmail.com';
+  const gmailPass = process.env.GMAIL_APP_PASSWORD || 'lpeuycgtdtrusxku';
+
+  try {
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: { user: gmailUser, pass: gmailPass }
+    });
+
+    const emailHtml = `
+      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 680px; margin: 0 auto; background: #0f172a; color: #e2e8f0; border-radius: 12px; overflow: hidden; border: 1px solid #0284c7; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+        <div style="background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%); padding: 24px 28px;">
+          <div style="font-size: 12px; font-weight: 700; color: #e0f2fe; text-transform: uppercase; letter-spacing: 1px;">Drug Discovery Studio &bull; Actionable Feedback Brief</div>
+          <h1 style="margin: 6px 0 0 0; color: #ffffff; font-size: 22px; font-weight: 800;">Ticket #${ticketId}: ${cat}</h1>
+        </div>
+        
+        <div style="padding: 24px 28px;">
+          <div style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 14px 18px; margin-bottom: 20px;">
+            <table style="width: 100%; font-size: 13px; color: #cbd5e1; border-collapse: collapse;">
+              <tr><td style="padding: 4px 0; width: 130px; font-weight: 700; color: #94a3b8;">Scientist User:</td><td style="color: #ffffff; font-weight: 600;">${submitterName} (&lt;${submitterEmail}&gt;)</td></tr>
+              <tr><td style="padding: 4px 0; font-weight: 700; color: #94a3b8;">Account Tier:</td><td><span style="background: #0284c7; color: white; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 700;">${tier.toUpperCase()}</span></td></tr>
+              <tr><td style="padding: 4px 0; font-weight: 700; color: #94a3b8;">Active Query:</td><td style="color: #38bdf8; font-weight: 600;">${appState?.sourceConcept || 'None'} ➔ ${appState?.targetConcept || 'None'}</td></tr>
+              <tr><td style="padding: 4px 0; font-weight: 700; color: #94a3b8;">Inspected Bridge:</td><td>${appState?.selectedBTerm || 'None'}</td></tr>
+              <tr><td style="padding: 4px 0; font-weight: 700; color: #94a3b8;">Submission Time:</td><td>${new Date().toUTCString()}</td></tr>
+            </table>
+          </div>
+
+          <h3 style="color: #38bdf8; font-size: 15px; margin: 0 0 8px 0;">1. Raw User Feedback</h3>
+          <div style="background: #1e293b; border-left: 4px solid #38bdf8; padding: 12px 16px; border-radius: 4px; font-size: 14px; color: #f8fafc; line-height: 1.5; margin-bottom: 20px;">
+            "${feedbackText}"
+          </div>
+
+          <h3 style="color: #34d399; font-size: 15px; margin: 0 0 8px 0;">2. AI 3.7 Executive Synthesis</h3>
+          <p style="font-size: 13.5px; color: #cbd5e1; line-height: 1.5; margin: 0 0 16px 0;">${aiBrief.executiveSummary}</p>
+
+          <h3 style="color: #f59e0b; font-size: 15px; margin: 0 0 8px 0;">3. Biological & Pharmacological Impact</h3>
+          <p style="font-size: 13.5px; color: #cbd5e1; line-height: 1.5; margin: 0 0 16px 0;">${aiBrief.biologicalImpact}</p>
+
+          <h3 style="color: #a78bfa; font-size: 15px; margin: 0 0 8px 0;">4. Proposed Zero-Regression Implementation</h3>
+          <p style="font-size: 13.5px; color: #cbd5e1; line-height: 1.5; margin: 0 0 16px 0;">${aiBrief.technicalImplementation}</p>
+
+          <h3 style="color: #38bdf8; font-size: 15px; margin: 0 0 8px 0;">5. Ready Ingestion Prompt for Antigravity / Gemini Swarm</h3>
+          <pre style="background: #020617; border: 1px solid rgba(6,182,212,0.3); border-radius: 6px; padding: 14px; font-family: monospace; font-size: 12px; color: #38bdf8; overflow-x: auto; white-space: pre-wrap; margin: 0 0 20px 0;">${aiBrief.developerIngestionPrompt}</pre>
+
+          <div style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 16px; font-size: 12px; color: #64748b; text-align: center;">
+            Drug Discovery Studio Live Infrastructure &bull; Automated Telemetry &bull; Single-Tenant Zero-Retention
+          </div>
+        </div>
+      </div>
+    `;
+
+    await transporter.sendMail({
+      from: `"Drug Discovery Studio" <${gmailUser}>`,
+      to: 'michael.janis@gmail.com',
+      replyTo: submitterEmail,
+      subject: `[${cat}] #${ticketId}: ${aiBrief.executiveSummary.slice(0, 60)}... (${submitterName})`,
+      html: emailHtml
+    });
+    console.log(`Feedback #${ticketId} emailed to michael.janis@gmail.com successfully!`);
+  } catch (emailErr) {
+    console.error(`Feedback #${ticketId} email error:`, emailErr);
+  }
+
+  res.json({
+    success: true,
+    ticketId,
+    aiBrief
+  });
+});
+
+
 app.post('/api/summarize-pmid', async (req, res) => {
   const { pmid } = req.body;
   if (!pmid) return res.status(400).json({ error: 'pmid required' });

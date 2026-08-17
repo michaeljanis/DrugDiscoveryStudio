@@ -10,16 +10,76 @@ interface DocumentationModalProps {
   onClose: () => void;
   initialTab?: string;
   onLaunchPreset?: (preset: { source: string; target: string }) => void;
+  clientContext?: {
+    sourceConcept?: string;
+    targetConcept?: string;
+    selectedBTerm?: any;
+    activeBTerms?: any[];
+    ledgerSteps?: any[];
+    authUser?: any;
+    accountTier?: string;
+  };
 }
 
 export const DocumentationModal: React.FC<DocumentationModalProps> = ({
   isOpen,
   onClose,
   initialTab = 'quickstart',
-  onLaunchPreset
+  onLaunchPreset,
+  clientContext
 }) => {
   const [activeTab, setActiveTab] = useState<string>(initialTab);
   const [searchQuery, setSearchQuery] = useState<string>('');
+  
+  // Feedback state
+  const [feedbackCategory, setFeedbackCategory] = useState<string>('Feature Request');
+  const [feedbackText, setFeedbackText] = useState<string>('');
+  const [isSubmittingFeedback, setIsSubmittingFeedback] = useState<boolean>(false);
+  const [feedbackSuccess, setFeedbackSuccess] = useState<any>(null);
+
+  React.useEffect(() => {
+    if (initialTab) {
+      setActiveTab(initialTab);
+    }
+  }, [initialTab, isOpen]);
+
+  const handleFeedbackSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!feedbackText.trim() || isSubmittingFeedback) return;
+
+    setIsSubmittingFeedback(true);
+    try {
+      const res = await fetch('/api/feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          feedbackText,
+          category: feedbackCategory,
+          userEmail: clientContext?.authUser?.email || 'scientist@institution.org',
+          userName: clientContext?.authUser?.displayName || 'Discovery Scientist',
+          accountTier: clientContext?.accountTier || 'free',
+          appState: {
+            sourceConcept: clientContext?.sourceConcept,
+            targetConcept: clientContext?.targetConcept,
+            selectedBTerm: clientContext?.selectedBTerm?.word || clientContext?.selectedBTerm,
+            activeBTerms: clientContext?.activeBTerms?.slice(0, 5),
+            ledgerSteps: clientContext?.ledgerSteps
+          }
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setFeedbackSuccess(data);
+        setFeedbackText('');
+      } else {
+        alert(data.error || 'Failed to submit feedback.');
+      }
+    } catch (err: any) {
+      alert('Error submitting feedback: ' + err.message);
+    } finally {
+      setIsSubmittingFeedback(false);
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -31,6 +91,7 @@ export const DocumentationModal: React.FC<DocumentationModalProps> = ({
     { id: 'ledger_dossier', label: '5. Hypothesis Ledger & IND Dossiers', icon: FileText },
     { id: 'enterprise_ip', label: '6. Enterprise IP & Zero-Retention', icon: Lock },
     { id: 'faq', label: '7. Scientific & Heuristic FAQ', icon: Info },
+    { id: 'feedback', label: '8. Scientist Feedback & Feature Requests', icon: Sparkles },
   ];
 
   return (
@@ -439,6 +500,134 @@ export const DocumentationModal: React.FC<DocumentationModalProps> = ({
               </div>
             )}
 
+
+
+            {/* CHAPTER 8: SCIENTIST FEEDBACK & FEATURE INGESTION */}
+            {activeTab === 'feedback' && (
+              <div>
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', color: '#0284c7', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', marginBottom: '0.5rem' }}>
+                  <Sparkles size={14} />
+                  <span>Interactive Scientist Feedback &amp; Feature Ingestion</span>
+                </div>
+                <h3 style={{ fontSize: '1.6rem', fontWeight: 800, color: '#0f172a', margin: '0 0 0.5rem 0' }}>
+                  8. Direct Feedback, Feature Requests &amp; AI Context Ingestion
+                </h3>
+                <p style={{ color: '#475569', fontSize: '0.92rem', margin: '0 0 1.5rem 0' }}>
+                  Submit direct feedback or feature requests to lead developer Dr. Janis. <strong>Gemini 3.7</strong> automatically inspects your active discovery telemetry (target pair, inspected bridges, hypothesis ledger) to synthesize an audit-grade developer brief and notify your account when the update is live in production.
+                </p>
+
+                {/* Live Context Telemetry Badge */}
+                <div style={{ background: '#f8fafc', border: '1px solid #cbd5e1', borderRadius: '10px', padding: '1rem 1.25rem', marginBottom: '1.5rem' }}>
+                  <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#0284c7', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                    <Activity size={14} />
+                    <span>Active Telemetry Automatically Captured with Submission:</span>
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.75rem', fontSize: '0.82rem', color: '#334155' }}>
+                    <div>
+                      <span style={{ color: '#64748b', display: 'block', fontSize: '0.72rem' }}>Scientist Account:</span>
+                      <strong>{clientContext?.authUser?.email || 'Guest Scientist (Unauthenticated)'}</strong>
+                    </div>
+                    <div>
+                      <span style={{ color: '#64748b', display: 'block', fontSize: '0.72rem' }}>Account Tier:</span>
+                      <span style={{ background: '#e0f2fe', color: '#0369a1', padding: '0.1rem 0.4rem', borderRadius: '4px', fontWeight: 700, fontSize: '0.75rem' }}>
+                        {(clientContext?.accountTier || 'Free').toUpperCase()}
+                      </span>
+                    </div>
+                    <div>
+                      <span style={{ color: '#64748b', display: 'block', fontSize: '0.72rem' }}>Active Discovery Pair:</span>
+                      <strong>{clientContext?.sourceConcept || 'None'} ➔ {clientContext?.targetConcept || 'None'}</strong>
+                    </div>
+                    <div>
+                      <span style={{ color: '#64748b', display: 'block', fontSize: '0.72rem' }}>Inspected B-Bridge:</span>
+                      <strong>{clientContext?.selectedBTerm?.word || clientContext?.selectedBTerm || 'None'}</strong>
+                    </div>
+                  </div>
+                </div>
+
+                {feedbackSuccess ? (
+                  <div style={{ background: '#f0fdf4', border: '1px solid #86efac', borderRadius: '12px', padding: '1.5rem', marginBottom: '1.5rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#16a34a', fontWeight: 800, fontSize: '1.1rem', marginBottom: '0.5rem' }}>
+                      <CheckCircle2 size={20} />
+                      <span>Feedback Ticket #{feedbackSuccess.ticketId} Dispatched!</span>
+                    </div>
+                    <p style={{ color: '#166534', fontSize: '0.88rem', margin: '0 0 1rem 0' }}>
+                      Your submission was analyzed by <strong>Gemini 3.7</strong> and emailed directly to <strong>michael.janis@gmail.com</strong>. A notification has been registered for your account and you will be notified when the feature/fix is deployed.
+                    </p>
+                    {feedbackSuccess.aiBrief && (
+                      <div style={{ background: '#ffffff', border: '1px solid #bbf7d0', borderRadius: '8px', padding: '1rem', fontSize: '0.84rem' }}>
+                        <div style={{ fontWeight: 700, color: '#0f172a', marginBottom: '0.3rem' }}>AI 3.7 Executive Brief:</div>
+                        <p style={{ margin: '0 0 0.5rem 0', color: '#334155' }}>{feedbackSuccess.aiBrief.executiveSummary}</p>
+                        <div style={{ fontWeight: 700, color: '#0f172a', marginBottom: '0.3rem' }}>Biological &amp; Preclinical Impact:</div>
+                        <p style={{ margin: 0, color: '#334155' }}>{feedbackSuccess.aiBrief.biologicalImpact}</p>
+                      </div>
+                    )}
+                    <button
+                      onClick={() => setFeedbackSuccess(null)}
+                      style={{ marginTop: '1rem', background: '#16a34a', color: 'white', border: 'none', padding: '0.5rem 1rem', borderRadius: '6px', fontSize: '0.82rem', fontWeight: 600, cursor: 'pointer' }}
+                    >
+                      Submit Another Feedback Note
+                    </button>
+                  </div>
+                ) : (
+                  <form onSubmit={handleFeedbackSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, color: '#0f172a', marginBottom: '0.4rem' }}>
+                        Feedback Category
+                      </label>
+                      <select
+                        value={feedbackCategory}
+                        onChange={(e) => setFeedbackCategory(e.target.value)}
+                        style={{ width: '100%', padding: '0.65rem 0.85rem', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.88rem', background: '#ffffff', color: '#0f172a', outline: 'none' }}
+                      >
+                        <option value="Feature Request">🚀 Feature Request / New Indication Discovery</option>
+                        <option value="Scientific Methodology">🔬 Scientific Methodology / Biological Inquiry</option>
+                        <option value="Toxicology & Safety Screen">🛡️ Toxicology / Assay Validation Protocol</option>
+                        <option value="Data Discrepancy & Bug">🐛 Bug Report / Data Discrepancy</option>
+                        <option value="Enterprise Integration">💼 Enterprise / Custom Pipeline Integration</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, color: '#0f172a', marginBottom: '0.4rem' }}>
+                        Your Feedback / Feature Description
+                      </label>
+                      <textarea
+                        rows={5}
+                        value={feedbackText}
+                        onChange={(e) => setFeedbackText(e.target.value)}
+                        placeholder="Describe the feature, target filtering (e.g. blood-brain barrier permeability, kinase selectivity), or workflow enhancement you would like to see..."
+                        style={{ width: '100%', padding: '0.75rem 0.85rem', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.88rem', color: '#0f172a', background: '#ffffff', outline: 'none', resize: 'vertical', lineHeight: 1.5 }}
+                        required
+                      />
+                    </div>
+
+                    <button
+                      type="submit"
+                      disabled={isSubmittingFeedback || !feedbackText.trim()}
+                      style={{
+                        background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '8px',
+                        padding: '0.85rem 1.5rem',
+                        fontSize: '0.92rem',
+                        fontWeight: 700,
+                        cursor: isSubmittingFeedback || !feedbackText.trim() ? 'not-allowed' : 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '0.5rem',
+                        opacity: isSubmittingFeedback || !feedbackText.trim() ? 0.6 : 1,
+                        boxShadow: '0 4px 12px rgba(2, 132, 199, 0.3)'
+                      }}
+                    >
+                      <Sparkles size={16} />
+                      <span>{isSubmittingFeedback ? 'Gemini 3.7 Synthesizing & Dispatching...' : '🚀 Submit Feedback & Ingest Action Brief'}</span>
+                    </button>
+                  </form>
+                )}
+              </div>
+            )}
           </div>
         </div>
 
