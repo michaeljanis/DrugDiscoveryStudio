@@ -1579,42 +1579,7 @@ export default function App() {
     executeSearch(bTermName, tgtParam, nextTrail.concat(bTermName).join(','));
   };
 
-  const submitFeedback = async () => {
-    if (!feedbackText.trim()) return;
-    setIsSendingFeedback(true);
-    
-    const appState = {
-      sourceConcept,
-      targetConcept,
-      selectedSources: Array.from(selectedSources),
-      selectedTargets: Array.from(selectedTargets),
-      selectedBTerm: selectedB ? selectedB.word : null,
-      maxHops,
-      minScore,
-      evidenceErrorA,
-      evidenceErrorC,
-      directCount
-    };
 
-    try {
-      const res = await fetch('/api/feedback', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ feedbackText, appState })
-      });
-      if (res.ok) {
-        setIsFeedbackModalOpen(false);
-        setFeedbackText("");
-        alert("Feedback sent directly to developer!");
-      } else {
-        alert("Failed to send feedback.");
-      }
-    } catch (e) {
-      alert("Error sending feedback.");
-    } finally {
-      setIsSendingFeedback(false);
-    }
-  };
 
   const submitProInquiry = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -3873,50 +3838,7 @@ export default function App() {
 
       </div>
 
-      {/* Slide-Over Documentation Panel */}
-      <div className={`docs-panel ${isDocsOpen ? 'open' : ''}`}>
-        <div className="docs-header">
-          <h2>{BRAND_NAME} Help</h2>
-          <button onClick={() => setIsDocsOpen(false)} className="close-docs-btn">&times;</button>
-        </div>
-        <div className="docs-content" dangerouslySetInnerHTML={{ __html: docsContent ? marked.parse(docsContent) as string : 'Loading...' }} />
-      </div>
 
-      {/* Floating Action Buttons */}
-      <div className="fab-container">
-        <button className="fab docs-fab" onClick={() => setIsDocsOpen(true)} title="Documentation">
-          <Info size={20} />
-        </button>
-      </div>
-
-      {/* Feedback Modal */}
-      {isFeedbackModalOpen && (
-        <div className="modal-overlay">
-          <div className="modal-content">
-            <h3>AI Improvement Request</h3>
-            <p style={{ color: 'var(--text-secondary)', marginBottom: '1rem', fontSize: '0.85rem', lineHeight: 1.4 }}>
-              Submit feature requests, logic fixes, or UI layout edits. This is <strong>recursive feedback</strong>: your request goes directly into the queue of the autonomous build agents currently coding and extending this application.
-            </p>
-            <textarea 
-              className="feedback-textarea" 
-              placeholder="Describe the issue, feature request, or logic bug..."
-              value={feedbackText}
-              onChange={(e) => setFeedbackText(e.target.value)}
-              rows={5}
-            />
-            <div className="modal-actions">
-              <button className="action-btn outline" onClick={() => setIsFeedbackModalOpen(false)}>Cancel</button>
-              <button 
-                className="action-btn explore-btn ready" 
-                onClick={submitFeedback}
-                disabled={isSendingFeedback || !feedbackText.trim()}
-              >
-                {isSendingFeedback ? <Loader2 className="animate-spin" size={16} /> : 'Send to Developer'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Global Footer */}
       <footer className="app-footer">
