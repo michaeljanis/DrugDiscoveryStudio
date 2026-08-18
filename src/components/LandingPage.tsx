@@ -122,28 +122,36 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
   const faqs = [
     {
-      q: "What is the core discovery acceleration of DrugDiscovery.Studio?",
-      a: "In early-stage target discovery and drug repositioning, synthesizing literature across disparate therapeutic domains takes months of manual review. DrugDiscovery.Studio accelerates target identification by connecting over 13.1 million verified biological relationships across 38.2 million biomedical papers. AI then synthesizes structured, citation-backed biological mechanisms, proposed lab assay validation schemes, and early safety screens in seconds—enabling discovery teams to prioritize only the highest-conviction hypotheses before committing wet-lab capital."
+      q: "What is DrugDiscovery.Studio and how does it accelerate early-stage research?",
+      a: "DrugDiscovery.Studio connects over 13.1 million verified biological relationships across 38.2 million biomedical papers. Instead of spending months manually scanning disparate literature silos, researchers can identify hidden intermediate mechanisms (kinases, receptors, transcription factors), generate citation-backed hypotheses, and prioritize high-conviction drug targets in seconds."
     },
     {
-      q: "How does this differ from naive Vector RAG or standard AI chat tools?",
-      a: "Standard AI chat and vector search tools rely on keywords and text similarity. When a compound and a disease reside in separate, non-citing literatures, keyword searches return zero results or hallucinate connections. DrugDiscovery.Studio uses graph pathfinding across 13.1M+ biomedical connections to mathematically discover intermediate biological bridges (such as kinases, receptors, and transcription factors) and rank them by literature gap density."
+      q: "How does this differ from ChatGPT or standard keyword search?",
+      a: "Standard AI chat tools and keyword searches rely on surface-level text similarity. If two scientific disciplines never cite one another, keyword searches return zero results or generic hallucinations. DrugDiscovery.Studio uses graph pathfinding across 13.1M+ biomedical connections to mathematically discover intermediate biological bridges and rank them by literature gap density."
     },
     {
-      q: "How are enterprise IP and data sovereignty protected?",
-      a: "We maintain a strict zero-retention policy for proprietary target queries. Single-tenant VPC deployments (AWS, GCP, Azure) are completely isolated, ensuring your private targets, internal Electronic Lab Notebooks (ELN), and proprietary assay datasets are never logged, stored in shared caches, or used to train public models."
+      q: "How does the platform uncover hidden mechanisms and drug repurposing opportunities?",
+      a: "We implement Don Swanson’s Literature-Based Discovery framework: when Drug A connects to Biological Mechanism B, and Mechanism B connects to Disease C, but there are zero direct papers linking A and C (Direct(A, C) = 0), the transitive bridge A ➔ B ➔ C represents an undiscovered, high-plausibility therapeutic opportunity."
     },
     {
-      q: "Why is AI essential for discovering new drug targets?",
-      a: "Human researchers cannot read millions of papers across oncology, immunology, and chemistry simultaneously. AI bridges these silos by analyzing hidden relationships across the entire biomedical literature, identifying unstudied mechanisms of action, and screening for potential drug safety risks before you begin expensive laboratory experiments."
+      q: "How does the system prevent false discoveries and ground AI reasoning?",
+      a: "Every proposed biological step is anchored by biomedical ontologies (MeSH, UMLS, MedDRA) and verified against empirical PubMed co-occurrence counts. The platform cross-references live experimental databases (ChEMBL 34 bioactivities, Open Targets genetics) to ensure hypotheses reflect genuine pharmacological feasibility."
     },
     {
-      q: "How does DrugDiscovery.Studio uncover defensible patent whitespace?",
-      a: "By calculating literature gap density, the platform isolates high-probability biological interactions that possess zero direct co-occurrence citations in published literature. This enables search & evaluation teams and patent attorneys to identify unstudied method-of-use and formulation IP before competitors."
+      q: "Can I use DrugDiscovery.Studio for novel targets or only approved drugs?",
+      a: "Both. You can investigate approved small molecules, investigational compounds, biologics, RNA therapies, or upstream genetic targets. The platform operates equally well in 'Closed Discovery' (finding the mechanistic bridge between a known drug and disease) or 'Open Discovery' (discovering novel disease indications for an uncharacterized target)."
     },
     {
-      q: "What does the Translational Hypothesis Ledger provide for translational teams?",
-      a: "The Translational Hypothesis Ledger functions as an audit-grade digital research notebook. Every graph traversal, intermediate bridge inspection, and hypothesis score is tracked with exact PubMed citation provenance. Teams can export the entire investigation into formal PDF, Word, or Markdown dossiers ready for grant proposals and IND filings with a single click."
+      q: "What databases and ontologies are integrated into the knowledge graph?",
+      a: "The platform integrates 38.2 million PubMed abstracts, 13.1 million co-occurrence causal edges, 2.4 million ChEMBL 34 bioactivity measurements, Open Targets Platform genetics, and standardized biomedical ontologies including MeSH, UMLS, and MedDRA."
+    },
+    {
+      q: "How is my research data and intellectual property protected?",
+      a: "We maintain a strict zero-retention policy for proprietary target queries. User sessions are completely isolated, ensuring your private targets, candidate structures, and exploratory notes are never logged, stored in shared caches, or used to train public models."
+    },
+    {
+      q: "What kinds of dossiers and reports can I export for my team?",
+      a: "With one click, you can compile your validated bridges and AI insights into an IND-ready Discovery Dossier. Dossiers include mechanistic rationale, target tractability data, proposed stage-gated in-vitro assays, and early safety screening—exportable in clean Markdown, PDF, or Word format."
     }
   ];
 
@@ -1548,14 +1556,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         margin: '0 auto'
       }}>
         <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
-          <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#0284c7', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+          <h2 style={{ fontSize: '2.3rem', fontWeight: 800, color: '#0f172a', margin: '0 0 0.75rem 0' }}>
             Frequently Asked Questions
-          </span>
-          <h2 style={{ fontSize: '2.3rem', fontWeight: 800, color: '#0f172a', margin: '0.5rem 0 1rem 0' }}>
-            Scientific, Technical &amp; IP Governance
           </h2>
           <p style={{ color: '#475569', fontSize: '0.95rem' }}>
-            Details on causal graph heuristics, data sovereignty, and algorithmic methodology.
+            Everything you need to know about our discovery methodology, biological data integration, and platform capabilities.
           </p>
         </div>
 
