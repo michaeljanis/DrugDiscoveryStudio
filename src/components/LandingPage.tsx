@@ -642,12 +642,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             pointerEvents: 'none'
           }}></div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', color: '#38bdf8', fontSize: '0.82rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.85rem' }}>
-            <Sparkles size={16} />
-            <span>Our Founding Mission &bull; The Literature Island Paradox</span>
-          </div>
-
-          <h2 style={{ fontSize: '2.4rem', fontWeight: 800, color: '#ffffff', margin: '0 0 1.5rem 0', letterSpacing: '-0.02em', lineHeight: 1.25 }}>
+          <h2 style={{ fontSize: '2.4rem', fontWeight: 800, color: '#ffffff', margin: '0 0 1.75rem 0', letterSpacing: '-0.02em', lineHeight: 1.25 }}>
             Why We Built DrugDiscovery.Studio
           </h2>
 
@@ -671,23 +666,24 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 We realized that the fundamental associative nature of Frontier AI—often criticized as &ldquo;hallucination&rdquo;—is actually a <strong style={{ color: '#38bdf8' }}>superpower for novel scientific discovery</strong> when properly harnessed.
               </p>
               <p style={{ margin: 0 }}>
-                By grounding deep biochemical reasoning models in a high-speed causal knowledge graph of <strong>13.1 million verified empirical associations</strong> and cross-referencing live databases (ChEMBL 34, Open Targets, PubMed E-utilities), we can turn associative biological intuition into testable, mathematically scored, preclinical drug hypotheses in seconds.
+                By grounding deep biochemical reasoning models in a high-speed causal knowledge graph of <strong>13.1 million verified empirical associations</strong> and cross-referencing live databases (ChEMBL 34, Open Targets, PubMed E-utilities), we turn associative biological intuition into testable, mathematically scored, preclinical drug hypotheses in seconds.
               </p>
               
-              {/* Highlight Box */}
+              {/* Vision Box: Ontological Scaffolding & Hidden Knowledge Discovery */}
               <div style={{
-                background: 'rgba(6, 182, 212, 0.08)',
-                border: '1px solid rgba(6, 182, 212, 0.3)',
-                borderRadius: '12px',
-                padding: '1.25rem 1.5rem',
-                marginTop: 'auto'
+                background: 'linear-gradient(135deg, rgba(6, 182, 212, 0.1) 0%, rgba(99, 102, 241, 0.1) 100%)',
+                border: '1px solid rgba(6, 182, 212, 0.35)',
+                borderRadius: '14px',
+                padding: '1.35rem 1.5rem',
+                marginTop: 'auto',
+                boxShadow: '0 4px 20px rgba(0, 0, 0, 0.2)'
               }}>
-                <div style={{ fontSize: '0.85rem', fontWeight: 800, color: '#38bdf8', marginBottom: '0.4rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                  <Zap size={15} />
-                  <span>The Core Mathematical Discovery Insight:</span>
+                <div style={{ fontSize: '0.85rem', fontWeight: 800, color: '#38bdf8', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+                  <Zap size={16} />
+                  <span>Ontological Grounding &amp; Finding the Hidden Needle:</span>
                 </div>
-                <div style={{ fontSize: '0.88rem', color: '#e2e8f0', lineHeight: 1.5 }}>
-                  If Modality A links to Intermediate Biology B, and Biology B links to Disease C, but literature co-occurrence <strong>Direct(A, C) = 0</strong>, the transitive bridge <strong>A ➔ B ➔ C</strong> represents an unpatented, high-plausibility therapeutic breakthrough.
+                <div style={{ fontSize: '0.88rem', color: '#e2e8f0', lineHeight: 1.55 }}>
+                  We use biomedical ontologies (MeSH, UMLS, MedDRA) and causal graph topology to focus the generative AI on valid biochemical spaces. By fortifying associative paths with 13.1M empirical literature co-occurrences where <strong>Direct(A, C) = 0</strong>, we find the undiscovered knowledge—the hidden therapeutic mechanism or drug needle in the 38.2-million-paper haystack.
                 </div>
               </div>
             </div>
