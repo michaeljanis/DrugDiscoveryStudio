@@ -214,7 +214,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   gap: '0.35rem'
                 }}>
                   <Sparkles size={12} />
-                  <span>{(accountTier === 'pro' || accountTier === 'scientist' || (authUser?.email && (authUser.email.toLowerCase() === 'clee@oncotelic.com' || authUser.email.toLowerCase() === 'michael.janis@gmail.com' || authUser.email.toLowerCase().endsWith('@oncotelic.com') || authUser.email.toLowerCase().endsWith('@siliconresearchgroup.com')))) ? 'Pro Scientist (Unlimited)' : accountTier === 'researcher' ? 'Researcher Plan' : `Free Account (${Math.max(0, 5 - (freeQueryCount || 0))} of 5 left)`}</span>
+                  <span>{(accountTier === 'pro' || accountTier === 'scientist') ? 'Pro Scientist (Unlimited)' : accountTier === 'researcher' ? 'Researcher Plan' : `Free Account (${Math.max(0, 5 - (freeQueryCount || 0))} of 5 left)`}</span>
                 </div>
                 <span style={{ fontSize: '0.82rem', color: '#475569', maxWidth: '140px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontWeight: 500 }}>
                   {authUser.displayName || authUser.email?.split('@')[0]}

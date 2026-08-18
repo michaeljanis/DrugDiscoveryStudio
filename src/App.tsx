@@ -12,6 +12,7 @@ import { LandingPage } from './components/LandingPage';
 import { CsoCopilot } from './components/CsoCopilot';
 import { DiscoveryProgressHud } from './components/DiscoveryProgressHud';
 import { DocumentationModal } from './components/DocumentationModal';
+import { FeedbackModal } from './components/FeedbackModal';
 import { Logo } from './components/Logo';
 import { marked } from 'marked';
 
@@ -232,6 +233,7 @@ export default function App() {
   const [isCopilotOpen, setIsCopilotOpen] = useState<boolean>(false);
   const [copilotInitialPrompt, setCopilotInitialPrompt] = useState<string | null>(null);
   const [isDocumentationOpen, setIsDocumentationOpen] = useState<boolean>(false);
+  const [isFeedbackOpen, setIsFeedbackOpen] = useState<boolean>(false);
   const [documentationInitialTab, setDocumentationInitialTab] = useState<string>('quickstart');
 
   interface NotificationItem {
@@ -2664,26 +2666,33 @@ export default function App() {
 
           <button 
             className="row-btn" 
-            onClick={() => {
-              setDocumentationInitialTab('quickstart');
-              setIsDocumentationOpen(true);
-            }}
+            onClick={() => setIsDocumentationOpen(true)}
             style={{ fontSize: '0.72rem', padding: '0.3rem 0.65rem', display: 'flex', alignItems: 'center', gap: '0.35rem', background: 'rgba(255, 255, 255, 0.03)', borderColor: 'var(--border-color)', height: '1.8rem', borderRadius: '4px', cursor: 'pointer' }}
           >
             <Info size={13} style={{ color: 'var(--color-cyan)' }} />
-            <span>Help &amp; Guide</span>
+            <span>User Guide</span>
           </button>
 
           <button 
             className="row-btn" 
-            onClick={() => {
-              setDocumentationInitialTab('feedback');
-              setIsDocumentationOpen(true);
+            onClick={() => setIsFeedbackOpen(true)}
+            style={{ 
+              fontSize: '0.72rem', 
+              padding: '0.3rem 0.75rem', 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: '0.35rem', 
+              background: 'linear-gradient(135deg, rgba(168,85,247,0.15) 0%, rgba(59,130,246,0.15) 100%)', 
+              borderColor: 'rgba(168,85,247,0.4)', 
+              color: '#c084fc',
+              height: '1.8rem', 
+              borderRadius: '4px', 
+              cursor: 'pointer',
+              fontWeight: 600
             }}
-            style={{ fontSize: '0.72rem', padding: '0.3rem 0.65rem', display: 'flex', alignItems: 'center', gap: '0.35rem', background: 'rgba(255, 255, 255, 0.03)', borderColor: 'var(--border-color)', height: '1.8rem', borderRadius: '4px', cursor: 'pointer' }}
           >
-            <Sparkles size={13} style={{ color: 'var(--color-purple)' }} />
-            <span>Scientist Feedback</span>
+            <Sparkles size={13} style={{ color: '#c084fc' }} />
+            <span>Feedback &amp; Requests</span>
           </button>
 
           <button 
@@ -4285,10 +4294,26 @@ export default function App() {
       <DocumentationModal
         isOpen={isDocumentationOpen}
         onClose={() => setIsDocumentationOpen(false)}
+        onOpenFeedback={() => setIsFeedbackOpen(true)}
         onLaunchPreset={(preset) => {
           setSourceConcept(preset.source);
           setTargetConcept(preset.target);
           executeSearch(preset.source, preset.target);
+        }}
+      />
+
+      {/* Dedicated Scientist Feedback & Feature Request Modal */}
+      <FeedbackModal
+        isOpen={isFeedbackOpen}
+        onClose={() => setIsFeedbackOpen(false)}
+        clientContext={{
+          sourceConcept,
+          targetConcept,
+          selectedBTerm: selectedB?.word || selectedConcept?.name,
+          activeBTerms: swansonBList,
+          ledgerSteps: historyTrail,
+          authUser,
+          accountTier
         }}
       />
 

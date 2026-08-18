@@ -64,7 +64,7 @@ export const loginWithGoogle = async (preferredEmail?: string) => {
   }
 
   // Fallback to verified email session
-  const fallbackEmail = preferredEmail || localStorage.getItem('drugdiscovery_email') || 'michael.janis@gmail.com';
+  const fallbackEmail = preferredEmail || localStorage.getItem('drugdiscovery_email') || 'scientist@biopharma.org';
   return loginWithEmail(fallbackEmail);
 };
 

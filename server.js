@@ -1437,7 +1437,7 @@ Synthesize an audit-grade Developer Action Brief returning ONLY a valid JSON obj
     id: 'notif_fb_' + ticketId,
     targetEmail: submitterEmail.toLowerCase(),
     title: `📬 Feedback Ticket #${ticketId} Received`,
-    message: `Thank you, ${submitterName}. Your ${cat.toLowerCase()} has been analyzed by Gemini 3.7 and forwarded directly to Lead Developer Dr. Michael Janis. You will be notified here when an update is deployed!`,
+    message: `Thank you. Your feedback has been received with high priority by the engineering and translational science team. You will be notified here when an update or fix is deployed.`,
     timestamp: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
     type: 'feedback',
     read: false
@@ -1445,7 +1445,7 @@ Synthesize an audit-grade Developer Action Brief returning ONLY a valid JSON obj
   notificationsList.unshift(userNotif);
   saveNotifications();
 
-  // Dispatch Email directly to michael.janis@gmail.com
+  // Dispatch Email directly to developer inbox in background
   const gmailUser = process.env.GMAIL_USER || 'michael.janis@gmail.com';
   const gmailPass = process.env.GMAIL_APP_PASSWORD || 'lpeuycgtdtrusxku';
 
@@ -1478,16 +1478,16 @@ Synthesize an audit-grade Developer Action Brief returning ONLY a valid JSON obj
             "${feedbackText}"
           </div>
 
-          <h3 style="color: #34d399; font-size: 15px; margin: 0 0 8px 0;">2. AI 3.7 Executive Synthesis</h3>
+          <h3 style="color: #34d399; font-size: 15px; margin: 0 0 8px 0;">2. AI Executive Synthesis</h3>
           <p style="font-size: 13.5px; color: #cbd5e1; line-height: 1.5; margin: 0 0 16px 0;">${aiBrief.executiveSummary}</p>
 
-          <h3 style="color: #f59e0b; font-size: 15px; margin: 0 0 8px 0;">3. Biological & Pharmacological Impact</h3>
+          <h3 style="color: #f59e0b; font-size: 15px; margin: 0 0 8px 0;">3. Biological &amp; Pharmacological Impact</h3>
           <p style="font-size: 13.5px; color: #cbd5e1; line-height: 1.5; margin: 0 0 16px 0;">${aiBrief.biologicalImpact}</p>
 
           <h3 style="color: #a78bfa; font-size: 15px; margin: 0 0 8px 0;">4. Proposed Zero-Regression Implementation</h3>
           <p style="font-size: 13.5px; color: #cbd5e1; line-height: 1.5; margin: 0 0 16px 0;">${aiBrief.technicalImplementation}</p>
 
-          <h3 style="color: #38bdf8; font-size: 15px; margin: 0 0 8px 0;">5. Ready Ingestion Prompt for Antigravity / Gemini Swarm</h3>
+          <h3 style="color: #38bdf8; font-size: 15px; margin: 0 0 8px 0;">5. Ready Ingestion Prompt for Antigravity / Coding Swarm</h3>
           <pre style="background: #020617; border: 1px solid rgba(6,182,212,0.3); border-radius: 6px; padding: 14px; font-family: monospace; font-size: 12px; color: #38bdf8; overflow-x: auto; white-space: pre-wrap; margin: 0 0 20px 0;">${aiBrief.developerIngestionPrompt}</pre>
 
           <div style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 16px; font-size: 12px; color: #64748b; text-align: center;">
@@ -1504,15 +1504,14 @@ Synthesize an audit-grade Developer Action Brief returning ONLY a valid JSON obj
       subject: `[${cat}] #${ticketId}: ${aiBrief.executiveSummary.slice(0, 60)}... (${submitterName})`,
       html: emailHtml
     });
-    console.log(`Feedback #${ticketId} emailed to michael.janis@gmail.com successfully!`);
+    console.log(`Feedback #${ticketId} emailed to developer inbox successfully!`);
   } catch (emailErr) {
     console.error(`Feedback #${ticketId} email error:`, emailErr);
   }
 
   res.json({
     success: true,
-    ticketId,
-    aiBrief
+    ticketId
   });
 });
 

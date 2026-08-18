@@ -10,15 +10,7 @@ interface DocumentationModalProps {
   onClose: () => void;
   initialTab?: string;
   onLaunchPreset?: (preset: { source: string; target: string }) => void;
-  clientContext?: {
-    sourceConcept?: string;
-    targetConcept?: string;
-    selectedBTerm?: any;
-    activeBTerms?: any[];
-    ledgerSteps?: any[];
-    authUser?: any;
-    accountTier?: string;
-  };
+  onOpenFeedback?: () => void;
 }
 
 export const DocumentationModal: React.FC<DocumentationModalProps> = ({
@@ -26,60 +18,15 @@ export const DocumentationModal: React.FC<DocumentationModalProps> = ({
   onClose,
   initialTab = 'quickstart',
   onLaunchPreset,
-  clientContext
+  onOpenFeedback
 }) => {
   const [activeTab, setActiveTab] = useState<string>(initialTab);
-  const [searchQuery, setSearchQuery] = useState<string>('');
-  
-  // Feedback state
-  const [feedbackCategory, setFeedbackCategory] = useState<string>('Feature Request');
-  const [feedbackText, setFeedbackText] = useState<string>('');
-  const [isSubmittingFeedback, setIsSubmittingFeedback] = useState<boolean>(false);
-  const [feedbackSuccess, setFeedbackSuccess] = useState<any>(null);
 
   React.useEffect(() => {
     if (initialTab) {
       setActiveTab(initialTab);
     }
   }, [initialTab, isOpen]);
-
-  const handleFeedbackSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!feedbackText.trim() || isSubmittingFeedback) return;
-
-    setIsSubmittingFeedback(true);
-    try {
-      const res = await fetch('/api/feedback', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          feedbackText,
-          category: feedbackCategory,
-          userEmail: clientContext?.authUser?.email || 'scientist@institution.org',
-          userName: clientContext?.authUser?.displayName || 'Discovery Scientist',
-          accountTier: clientContext?.accountTier || 'free',
-          appState: {
-            sourceConcept: clientContext?.sourceConcept,
-            targetConcept: clientContext?.targetConcept,
-            selectedBTerm: clientContext?.selectedBTerm?.word || clientContext?.selectedBTerm,
-            activeBTerms: clientContext?.activeBTerms?.slice(0, 5),
-            ledgerSteps: clientContext?.ledgerSteps
-          }
-        })
-      });
-      const data = await res.json();
-      if (data.success) {
-        setFeedbackSuccess(data);
-        setFeedbackText('');
-      } else {
-        alert(data.error || 'Failed to submit feedback.');
-      }
-    } catch (err: any) {
-      alert('Error submitting feedback: ' + err.message);
-    } finally {
-      setIsSubmittingFeedback(false);
-    }
-  };
 
   if (!isOpen) return null;
 
@@ -91,7 +38,6 @@ export const DocumentationModal: React.FC<DocumentationModalProps> = ({
     { id: 'ledger_dossier', label: '5. Hypothesis Ledger & IND Dossiers', icon: FileText },
     { id: 'enterprise_ip', label: '6. Enterprise IP & Zero-Retention', icon: Lock },
     { id: 'faq', label: '7. Scientific & Heuristic FAQ', icon: Info },
-    { id: 'feedback', label: '8. Scientist Feedback & Feature Requests', icon: Sparkles },
   ];
 
   return (
@@ -201,6 +147,33 @@ export const DocumentationModal: React.FC<DocumentationModalProps> = ({
               );
             })}
 
+            {onOpenFeedback && (
+              <button
+                onClick={() => {
+                  onClose();
+                  onOpenFeedback();
+                }}
+                style={{
+                  marginTop: '0.75rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.65rem',
+                  padding: '0.65rem 0.85rem',
+                  borderRadius: '8px',
+                  border: '1px dashed #0284c7',
+                  background: 'rgba(2, 132, 199, 0.05)',
+                  color: '#0284c7',
+                  fontSize: '0.82rem',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  textAlign: 'left'
+                }}
+              >
+                <Sparkles size={15} />
+                <span>Submit Feedback / Request</span>
+              </button>
+            )}
+
             <div style={{ marginTop: 'auto', paddingTop: '1.5rem', borderTop: '1px solid #e2e8f0' }}>
               <div style={{
                 background: '#ffffff',
@@ -239,21 +212,21 @@ export const DocumentationModal: React.FC<DocumentationModalProps> = ({
                   <h4 style={{ margin: '0 0 0.75rem 0', fontSize: '1rem', color: '#0f172a', fontWeight: 700 }}>
                     5-Step Rapid Discovery Protocol:
                   </h4>
-                  <ol style={{ margin: 0, paddingLeft: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+                  <ol style={{ paddingLeft: '1.25rem', margin: 0, display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                     <li>
-                      <strong>Define Concept A (Input Modality / Compound):</strong> Enter a small molecule, peptide, approved drug, or candidate entity (e.g. <em>Semaglutide</em>, <em>Olaparib</em>, <em>Metformin</em>).
+                      <strong>Define Concepts A &amp; C:</strong> Enter your candidate small molecule, biological modality, or target gene as <em>Concept A</em> and the disease phenotype as <em>Concept C</em>.
                     </li>
                     <li>
-                      <strong>Define Concept C (Indication / Target Phenotype):</strong> Enter a disease indication, oncology subtype, or pathological state (e.g. <em>Alzheimer Disease</em>, <em>Triple-Negative Breast Cancer</em>).
+                      <strong>Autonomous Topological Traversal:</strong> Click <em>Execute Discovery Search</em>. The system traverses 13.1M+ empirical co-occurrence edges to extract intermediate <em>Concept B</em> hubs (kinases, receptors, transcription factors).
                     </li>
                     <li>
-                      <strong>Traverse Multi-Hop Topological Bridges ($B$-Terms):</strong> The graph engine queries 13.1M+ empirical co-occurrence edges across 38.2M PubMed papers to identify intermediate biological bridges (kinases, receptors, transcription factors).
+                      <strong>Review High-Dimensional B-Terms:</strong> Inspect ranking by mutual information score, A-B citation volume, and B-C citation volume.
                     </li>
                     <li>
-                      <strong>Autonomous AI Mechanism Synthesis:</strong> Frontier AI cross-evaluates literature evidence, screens for toxicology liabilities (hERG, liver, BBB), and formats a testable biological hypothesis.
+                      <strong>Pair-Program with Translational Bio-AI:</strong> Ask the domain-grounded Bio-AI to synthesize multi-hop pathways, critique binding kinetics, and recommend stage-gated in-vitro assays.
                     </li>
                     <li>
-                      <strong>Compile &amp; Export IND Research Dossiers:</strong> Log findings to your <em>Translational Hypothesis Ledger</em> and export formal PDF/Word dossiers with suggested in-vitro validation protocols.
+                      <strong>Generate IND-Ready Dossier:</strong> Click <em>Synthesize Discovery Dossier</em> to compile a publication-grade mechanistic brief complete with ChEMBL bioactivities and Open Targets data.
                     </li>
                   </ol>
                 </div>
@@ -268,8 +241,8 @@ export const DocumentationModal: React.FC<DocumentationModalProps> = ({
                       background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)',
                       color: 'white',
                       border: 'none',
-                      borderRadius: '8px',
                       padding: '0.65rem 1.25rem',
+                      borderRadius: '8px',
                       fontSize: '0.85rem',
                       fontWeight: 700,
                       cursor: 'pointer',
@@ -278,7 +251,7 @@ export const DocumentationModal: React.FC<DocumentationModalProps> = ({
                       gap: '0.4rem'
                     }}
                   >
-                    <span>Try Semaglutide &rarr; Alzheimer's Benchmark</span>
+                    <span>Launch Semaglutide ➔ Alzheimer's Tutorial</span>
                     <ArrowRight size={14} />
                   </button>
                 </div>
@@ -288,143 +261,83 @@ export const DocumentationModal: React.FC<DocumentationModalProps> = ({
             {/* CHAPTER 2: METHODOLOGY */}
             {activeTab === 'methodology' && (
               <div>
-                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', color: '#4f46e5', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', marginBottom: '0.5rem' }}>
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', color: '#0284c7', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', marginBottom: '0.5rem' }}>
                   <Network size={14} />
-                  <span>Causal Graph Theory</span>
+                  <span>Graph Theory &amp; Algorithms</span>
                 </div>
                 <h3 style={{ fontSize: '1.6rem', fontWeight: 800, color: '#0f172a', margin: '0 0 1rem 0' }}>
-                  2. Scientific Methodology &amp; Topological Bridging
+                  2. Scientific Methodology &amp; Mathematical Scoring
                 </h3>
                 <p>
-                  The platform is built on modern graph-theoretic extensions of the <strong>Swanson Literature-Based Discovery (LBD)</strong> paradigm:
+                  DrugDiscovery.Studio implements Don Swanson's foundational <em>Undiscovered Public Knowledge (UPK)</em> literature-based discovery framework, extended with modern graph centrality algorithms and real-time cross-database validation.
                 </p>
 
-                <div style={{ background: '#f0f9ff', border: '1px solid #bae6fd', borderRadius: '12px', padding: '1.25rem', margin: '1.25rem 0' }}>
-                  <div style={{ fontWeight: 800, color: '#0369a1', marginBottom: '0.35rem' }}>The Transitive Causal Bridging Formula</div>
-                  <div style={{ fontFamily: 'monospace', fontSize: '0.95rem', color: '#0f172a', background: 'white', padding: '0.6rem 1rem', borderRadius: '6px', border: '1px solid #bae6fd' }}>
-                    A &cap; B &ne; &empty; &nbsp;&and;&nbsp; B &cap; C &ne; &empty; &nbsp;&and;&nbsp; A &cap; C = &empty;
-                  </div>
-                  <p style={{ fontSize: '0.85rem', color: '#0369a1', marginTop: '0.5rem', marginBottom: 0 }}>
-                    If literature sets show that Concept $A$ interacts with intermediate entity $B$, and separate literature proves that $B$ modulates disease $C$, but $A$ and $C$ have zero direct joint publications, then $A \rightarrow B \rightarrow C$ forms a novel, unstudied therapeutic pathway.
-                  </p>
-                </div>
-
-                <h4 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#0f172a', marginTop: '1.5rem' }}>
-                  Literature Gap Density &amp; B-Term Scoring Heuristics
+                <h4 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#0f172a', margin: '1.5rem 0 0.5rem 0' }}>
+                  Swanson Open vs. Closed Discovery
                 </h4>
                 <p>
-                  Intermediate entities are ranked by a multi-parametric score balancing topological connectivity and therapeutic novelty:
+                  <strong>Closed Discovery (Mechanistic Bridging):</strong> When both A (Drug) and C (Disease) are specified, the engine extracts the intersection of their neighborhoods <em>B = N(A) ∩ N(C)</em> where literature co-occurrence <strong>Direct(A, C) = 0</strong>.
                 </p>
-                <ul>
-                  <li><strong>Empirical Association Weight (W_AB, W_BC):</strong> Pointwise mutual information (PMI) and co-occurrence counts extracted from PubMed abstracts.</li>
-                  <li><strong>Direct Co-Occurrence Penalty (W_AC):</strong> Penalizes well-known existing combinations to surface uncrowded patent whitespace.</li>
-                  <li><strong>Biological Modality Filter:</strong> Prioritizes targetable druggable classes (GPCRs, Kinases, E3 Ligases, Ion Channels, Transcription Factors) via ChEMBL &amp; Open Targets ontologies.</li>
-                </ul>
+                <p>
+                  <strong>Open Discovery (Autonomous Target Finding):</strong> When only Concept A is provided, the engine projects all connected intermediate paths outward to identify previously unassociated disease phenotypes with high topological affinity.
+                </p>
               </div>
             )}
 
-            {/* CHAPTER 3: DEEP DIVES */}
+            {/* CHAPTER 3: DEEP DIVES & BENCHMARKS */}
             {activeTab === 'deep_dives' && (
               <div>
-                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', color: '#059669', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', marginBottom: '0.5rem' }}>
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', color: '#0284c7', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', marginBottom: '0.5rem' }}>
                   <FlaskConical size={14} />
-                  <span>Translational Deep Dives</span>
+                  <span>Validated Benchmarks</span>
                 </div>
                 <h3 style={{ fontSize: '1.6rem', fontWeight: 800, color: '#0f172a', margin: '0 0 1rem 0' }}>
-                  3. Validated Biopharma Case Studies &amp; How-Tos
+                  3. Validated Case Studies &amp; Preclinical How-Tos
                 </h3>
-                <p>
-                  Review four landmark translational discovery examples illustrating how topological bridging uncovers unexpected clinical mechanisms before Phase III commitment:
-                </p>
-
-                {/* Case 1 */}
-                <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '1.25rem', marginBottom: '1.25rem', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
-                  <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#0284c7', textTransform: 'uppercase' }}>Case Study 1: Neuro-Metabolic Repurposing</div>
-                  <h4 style={{ margin: '0.25rem 0 0.5rem 0', color: '#0f172a', fontSize: '1.1rem' }}>
-                    Semaglutide &rarr; GLP-1R / NLRP3 &rarr; Alzheimer's Disease
+                
+                <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '1.25rem', marginBottom: '1.5rem' }}>
+                  <h4 style={{ margin: '0 0 0.5rem 0', color: '#0284c7', fontWeight: 700 }}>
+                    Case Study 1: Semaglutide in Early Alzheimer's Disease
                   </h4>
-                  <p style={{ fontSize: '0.88rem', color: '#475569' }}>
-                    <strong>Causal Mechanism:</strong> Semaglutide crosses the blood-brain barrier to bind microglial GLP-1 receptors, activating cAMP/PKA signaling. This suppresses NLRP3 inflammasome assembly, shifting microglia from an M1 neuroinflammatory phenotype to an M2 neuroprotective state, halting synaptic loss.
+                  <p style={{ margin: '0 0 0.5rem 0', fontSize: '0.88rem' }}>
+                    <strong>The Clinical Gap:</strong> Metabolic GLP-1 receptor agonists were traditionally developed for glycemic control in Type 2 Diabetes.
                   </p>
-                  <div style={{ fontSize: '0.78rem', color: '#059669', fontWeight: 700 }}>
-                    Validated Status: EVOKE &amp; EVOKE+ Global Phase III Clinical Trials
-                  </div>
+                  <p style={{ margin: 0, fontSize: '0.88rem' }}>
+                    <strong>The Discovered Mechanism:</strong> GLP-1R microglial receptor activation engages intracellular cAMP/PKA to downregulate the NLRP3 inflammasome, suppressing neuroinflammatory synaptic pruning.
+                  </p>
                 </div>
 
-                {/* Case 2 */}
-                <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '1.25rem', marginBottom: '1.25rem', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
-                  <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#4f46e5', textTransform: 'uppercase' }}>Case Study 2: Immuno-Oncology Synergies</div>
-                  <h4 style={{ margin: '0.25rem 0 0.5rem 0', color: '#0f172a', fontSize: '1.1rem' }}>
-                    Olaparib &rarr; cGAS-STING Innate Immunity &rarr; Triple-Negative Breast Cancer
+                <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '1.25rem' }}>
+                  <h4 style={{ margin: '0 0 0.5rem 0', color: '#0284c7', fontWeight: 700 }}>
+                    Case Study 2: Olaparib &amp; cGAS-STING in Triple-Negative Breast Cancer
                   </h4>
-                  <p style={{ fontSize: '0.88rem', color: '#475569' }}>
-                    <strong>Causal Mechanism:</strong> Olaparib-induced replication fork collapse spills double-stranded DNA into the cytosol. Cytosolic DNA triggers cGAS-STING-TBK1 signaling, turning 'cold' TNBC tumors into interferon-rich, CD8+ T-cell-infiltrated targets responsive to PD-1/PD-L1 checkpoint blockade.
+                  <p style={{ margin: '0 0 0.5rem 0', fontSize: '0.88rem' }}>
+                    <strong>The Clinical Gap:</strong> PARP inhibitors were categorized strictly as DNA-repair blockers.
                   </p>
-                  <div style={{ fontSize: '0.78rem', color: '#059669', fontWeight: 700 }}>
-                    Validated Status: Nature &amp; Science Immunology Translational Benchmark
-                  </div>
-                </div>
-
-                {/* Case 3 */}
-                <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '1.25rem', marginBottom: '1.25rem', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
-                  <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#16a34a', textTransform: 'uppercase' }}>Case Study 3: Targeted Protein Degradation (TPD)</div>
-                  <h4 style={{ margin: '0.25rem 0 0.5rem 0', color: '#0f172a', fontSize: '1.1rem' }}>
-                    Lenalidomide &rarr; CRL4-CRBN E3 Ligase &rarr; Multiple Myeloma
-                  </h4>
-                  <p style={{ fontSize: '0.88rem', color: '#475569' }}>
-                    <strong>Causal Mechanism:</strong> Acts as a molecular glue by binding Cereblon (CRBN), reprogramming its substrate specificity to selectively polyubiquitinate and degrade non-native transcription factors IKZF1 and IKZF3 via the 26S proteasome.
+                  <p style={{ margin: 0, fontSize: '0.88rem' }}>
+                    <strong>The Discovered Mechanism:</strong> Unresolved DNA replication stress leaks cytosolic double-stranded DNA, activating cGAS-STING and transforming immunologically "cold" tumors into interferon-rich, checkpoint-responsive targets.
                   </p>
-                  <div style={{ fontSize: '0.78rem', color: '#059669', fontWeight: 700 }}>
-                    Validated Status: FDA Approved Standard of Care &amp; TPD Paradigm
-                  </div>
                 </div>
               </div>
             )}
 
-            {/* CHAPTER 4: TOXICOLOGY */}
+            {/* CHAPTER 4: TOXICOLOGY & SAFETY */}
             {activeTab === 'toxicology' && (
               <div>
-                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', color: '#dc2626', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', marginBottom: '0.5rem' }}>
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', color: '#0284c7', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', marginBottom: '0.5rem' }}>
                   <Shield size={14} />
-                  <span>Safety &amp; Toxicology</span>
+                  <span>Preclinical De-Risking</span>
                 </div>
                 <h3 style={{ fontSize: '1.6rem', fontWeight: 800, color: '#0f172a', margin: '0 0 1rem 0' }}>
-                  4. Real-Time AI Safety, Toxicology &amp; In-Vitro Assays
+                  4. AI Safety &amp; Toxicology Screening Protocols
                 </h3>
                 <p>
-                  To prevent costly late-stage attrition, every AI-synthesized hypothesis is automatically passed through an integrated toxicology and liability screen before wet-lab commitment:
+                  Translational discovery requires rapid safety screening before wet-lab assay commitment. The platform automatically critiques potential preclinical liabilities:
                 </p>
-
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1rem', margin: '1.25rem 0' }}>
-                  <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '1rem' }}>
-                    <div style={{ fontWeight: 700, color: '#0f172a', marginBottom: '0.25rem' }}>hERG Cardiotoxicity</div>
-                    <div style={{ fontSize: '0.82rem', color: '#64748b' }}>
-                      Flags potential I_Kr potassium channel blockade risks associated with QT prolongation and cardiac arrhythmias.
-                    </div>
-                  </div>
-                  <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '1rem' }}>
-                    <div style={{ fontWeight: 700, color: '#0f172a', marginBottom: '0.25rem' }}>Hepatotoxicity &amp; DILI</div>
-                    <div style={{ fontSize: '0.82rem', color: '#64748b' }}>
-                      Screens for CYP450 reactive metabolite formation, mitochondrial toxicity, and drug-induced liver injury risks.
-                    </div>
-                  </div>
-                  <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '1rem' }}>
-                    <div style={{ fontWeight: 700, color: '#0f172a', marginBottom: '0.25rem' }}>BBB Permeability</div>
-                    <div style={{ fontSize: '0.82rem', color: '#64748b' }}>
-                      Computes CNS MPO scores and passive membrane diffusion for neurodegenerative and neuro-oncology targets.
-                    </div>
-                  </div>
-                </div>
-
-                <h4 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#0f172a', marginTop: '1.5rem' }}>
-                  Structured In-Vitro Assay Validation Protocols
-                </h4>
-                <p>
-                  The platform outputs actionable laboratory assay protocols to validate target engagement:
-                </p>
-                <ul>
-                  <li><strong>Target Engagement Assays:</strong> CETSA (Cellular Thermal Shift Assay), SPR (Surface Plasmon Resonance), and NanoBRET target occupancy.</li>
-                  <li><strong>Downstream Functional Readouts:</strong> Western Blot phosphorylation cascades, qPCR transcriptional markers, and cell viability IC50 dose-response curves.</li>
+                <ul style={{ paddingLeft: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                  <li><strong>hERG Cardiotoxicity:</strong> Identifies potential I_Kr potassium channel blockade liabilities.</li>
+                  <li><strong>Hepatotoxicity &amp; CYP450:</strong> Flags cytochrome P450 inhibition and metabolic liabilities.</li>
+                  <li><strong>Blood-Brain Barrier (BBB) Permeability:</strong> Evaluates CNS multiparameter optimization (CNS MPO) metrics.</li>
                 </ul>
               </div>
             )}
@@ -434,41 +347,37 @@ export const DocumentationModal: React.FC<DocumentationModalProps> = ({
               <div>
                 <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', color: '#0284c7', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', marginBottom: '0.5rem' }}>
                   <FileText size={14} />
-                  <span>Audit-Grade Documentation</span>
+                  <span>IND Synthesis</span>
                 </div>
                 <h3 style={{ fontSize: '1.6rem', fontWeight: 800, color: '#0f172a', margin: '0 0 1rem 0' }}>
-                  5. Translational Hypothesis Ledger &amp; IND Dossier Export
+                  5. Living Hypothesis Ledger &amp; IND Dossiers
                 </h3>
                 <p>
-                  The <strong>Translational Hypothesis Ledger</strong> functions as an audit-grade electronic discovery notebook. Every graph traversal, B-term milestone, and mechanistic critique is tracked with exact PubMed citation provenance.
+                  As you explore multi-hop causal graphs, every validated bridge and AI reasoning insight can be pinned directly to your private <strong>Hypothesis Ledger</strong>.
                 </p>
-
-                <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '1.25rem', margin: '1.25rem 0' }}>
-                  <h4 style={{ margin: '0 0 0.5rem 0', fontSize: '1rem', color: '#0f172a' }}>1-Click IND Publication Dossier Export</h4>
-                  <p style={{ fontSize: '0.88rem', color: '#475569', margin: 0 }}>
-                    Export your full investigation into publication-ready documents formatted for NIH/ERC grant proposals, internal scientific review boards, and FDA IND Pre-Meeting Briefing packages in <strong>PDF</strong>, <strong>Microsoft Word (.docx)</strong>, or <strong>Markdown</strong> formats.
-                  </p>
-                </div>
+                <p>
+                  Clicking <em>Synthesize Discovery Dossier</em> instantly compiles your ledger milestones, ChEMBL bioactivities, and Open Targets localizations into a publication-ready report formatted for scientific advisory boards and regulatory filings.
+                </p>
               </div>
             )}
 
-            {/* CHAPTER 6: ENTERPRISE IP */}
+            {/* CHAPTER 6: ENTERPRISE IP & ZERO-RETENTION */}
             {activeTab === 'enterprise_ip' && (
               <div>
-                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', color: '#0f172a', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', marginBottom: '0.5rem' }}>
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', color: '#0284c7', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', marginBottom: '0.5rem' }}>
                   <Lock size={14} />
                   <span>Enterprise Security</span>
                 </div>
                 <h3 style={{ fontSize: '1.6rem', fontWeight: 800, color: '#0f172a', margin: '0 0 1rem 0' }}>
-                  6. Enterprise Data Sovereignty &amp; Zero-Retention Policy
+                  6. Enterprise IP Protection &amp; Zero-Retention Policy
                 </h3>
                 <p>
-                  Biopharma IP requires uncompromising confidentiality. DrugDiscovery.Studio enforces institutional data governance:
+                  Biopharma discovery queries represent mission-critical intellectual property. DrugDiscovery.Studio is engineered with strict single-tenant session isolation:
                 </p>
-                <ul>
-                  <li><strong>Zero-Retention Target Queries:</strong> Proprietary input targets and compounds are never logged, cached across shared tenants, or used to train public models.</li>
-                  <li><strong>Single-Tenant VPC Deployments:</strong> Available on AWS, GCP, and Microsoft Azure with dedicated KMS customer-managed encryption keys.</li>
-                  <li><strong>SOC2 Type II &amp; HIPAA Compliant:</strong> End-to-end TLS 1.3 encryption for all data in flight and at rest.</li>
+                <ul style={{ paddingLeft: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                  <li><strong>Strict Zero-Retention:</strong> User queries and candidate structures are processed in isolated sessions with zero retention.</li>
+                  <li><strong>No Model Training:</strong> Proprietary biopharma hypotheses are never used to train foundation models.</li>
+                  <li><strong>Encrypted Transport:</strong> All data is encrypted in transit (TLS 1.3) and at rest.</li>
                 </ul>
               </div>
             )}
@@ -478,154 +387,40 @@ export const DocumentationModal: React.FC<DocumentationModalProps> = ({
               <div>
                 <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', color: '#0284c7', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', marginBottom: '0.5rem' }}>
                   <Info size={14} />
-                  <span>Technical Reference</span>
+                  <span>Frequently Asked Questions</span>
                 </div>
                 <h3 style={{ fontSize: '1.6rem', fontWeight: 800, color: '#0f172a', margin: '0 0 1rem 0' }}>
-                  7. Frequently Asked Questions
+                  7. Scientific &amp; Heuristic FAQ
                 </h3>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '1rem' }}>
+                
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                   <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '1rem' }}>
-                    <strong style={{ color: '#0f172a', display: 'block', marginBottom: '0.35rem' }}>How often is the PubMed graph updated?</strong>
+                    <strong style={{ color: '#0f172a', display: 'block', marginBottom: '0.3rem' }}>
+                      How often is the biomedical knowledge graph updated?
+                    </strong>
                     <span style={{ fontSize: '0.85rem', color: '#475569' }}>
-                      The causal knowledge graph indexes 38.2M+ abstracts with ongoing synchronization to capture newly published biomedical papers and bioactivities.
+                      The underlying causal graph is refreshed continuously from PubMed abstracts and synchronized weekly with live releases of ChEMBL and Open Targets.
                     </span>
                   </div>
+
                   <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '1rem' }}>
-                    <strong style={{ color: '#0f172a', display: 'block', marginBottom: '0.35rem' }}>Can I upload internal ELN or assay data?</strong>
+                    <strong style={{ color: '#0f172a', display: 'block', marginBottom: '0.3rem' }}>
+                      Can I export generated dossiers to PDF or Markdown?
+                    </strong>
+                    <span style={{ fontSize: '0.85rem', color: '#475569' }}>
+                      Yes, all IND-ready discovery dossiers can be copied, exported as formatted Markdown, or printed directly to PDF.
+                    </span>
+                  </div>
+
+                  <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '1rem' }}>
+                    <strong style={{ color: '#0f172a', display: 'block', marginBottom: '0.3rem' }}>
+                      Can we integrate our internal proprietary compound libraries?
+                    </strong>
                     <span style={{ fontSize: '0.85rem', color: '#475569' }}>
                       Yes, through Biotech Lab and Enterprise plans, teams can overlay proprietary assay data onto the global biomedical graph within their private VPC.
                     </span>
                   </div>
                 </div>
-              </div>
-            )}
-
-
-
-            {/* CHAPTER 8: SCIENTIST FEEDBACK & FEATURE INGESTION */}
-            {activeTab === 'feedback' && (
-              <div>
-                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', color: '#0284c7', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', marginBottom: '0.5rem' }}>
-                  <Sparkles size={14} />
-                  <span>Interactive Scientist Feedback &amp; Feature Ingestion</span>
-                </div>
-                <h3 style={{ fontSize: '1.6rem', fontWeight: 800, color: '#0f172a', margin: '0 0 0.5rem 0' }}>
-                  8. Direct Feedback, Feature Requests &amp; AI Context Ingestion
-                </h3>
-                <p style={{ color: '#475569', fontSize: '0.92rem', margin: '0 0 1.5rem 0' }}>
-                  Submit direct feedback or feature requests to lead developer Dr. Janis. <strong>Gemini 3.7</strong> automatically inspects your active discovery telemetry (target pair, inspected bridges, hypothesis ledger) to synthesize an audit-grade developer brief and notify your account when the update is live in production.
-                </p>
-
-                {/* Live Context Telemetry Badge */}
-                <div style={{ background: '#f8fafc', border: '1px solid #cbd5e1', borderRadius: '10px', padding: '1rem 1.25rem', marginBottom: '1.5rem' }}>
-                  <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#0284c7', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                    <Activity size={14} />
-                    <span>Active Telemetry Automatically Captured with Submission:</span>
-                  </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.75rem', fontSize: '0.82rem', color: '#334155' }}>
-                    <div>
-                      <span style={{ color: '#64748b', display: 'block', fontSize: '0.72rem' }}>Scientist Account:</span>
-                      <strong>{clientContext?.authUser?.email || 'Guest Scientist (Unauthenticated)'}</strong>
-                    </div>
-                    <div>
-                      <span style={{ color: '#64748b', display: 'block', fontSize: '0.72rem' }}>Account Tier:</span>
-                      <span style={{ background: '#e0f2fe', color: '#0369a1', padding: '0.1rem 0.4rem', borderRadius: '4px', fontWeight: 700, fontSize: '0.75rem' }}>
-                        {(clientContext?.accountTier || 'Free').toUpperCase()}
-                      </span>
-                    </div>
-                    <div>
-                      <span style={{ color: '#64748b', display: 'block', fontSize: '0.72rem' }}>Active Discovery Pair:</span>
-                      <strong>{clientContext?.sourceConcept || 'None'} ➔ {clientContext?.targetConcept || 'None'}</strong>
-                    </div>
-                    <div>
-                      <span style={{ color: '#64748b', display: 'block', fontSize: '0.72rem' }}>Inspected B-Bridge:</span>
-                      <strong>{clientContext?.selectedBTerm?.word || clientContext?.selectedBTerm || 'None'}</strong>
-                    </div>
-                  </div>
-                </div>
-
-                {feedbackSuccess ? (
-                  <div style={{ background: '#f0fdf4', border: '1px solid #86efac', borderRadius: '12px', padding: '1.5rem', marginBottom: '1.5rem' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#16a34a', fontWeight: 800, fontSize: '1.1rem', marginBottom: '0.5rem' }}>
-                      <CheckCircle2 size={20} />
-                      <span>Feedback Ticket #{feedbackSuccess.ticketId} Dispatched!</span>
-                    </div>
-                    <p style={{ color: '#166534', fontSize: '0.88rem', margin: '0 0 1rem 0' }}>
-                      Your submission was analyzed by <strong>Gemini 3.7</strong> and emailed directly to <strong>michael.janis@gmail.com</strong>. A notification has been registered for your account and you will be notified when the feature/fix is deployed.
-                    </p>
-                    {feedbackSuccess.aiBrief && (
-                      <div style={{ background: '#ffffff', border: '1px solid #bbf7d0', borderRadius: '8px', padding: '1rem', fontSize: '0.84rem' }}>
-                        <div style={{ fontWeight: 700, color: '#0f172a', marginBottom: '0.3rem' }}>AI 3.7 Executive Brief:</div>
-                        <p style={{ margin: '0 0 0.5rem 0', color: '#334155' }}>{feedbackSuccess.aiBrief.executiveSummary}</p>
-                        <div style={{ fontWeight: 700, color: '#0f172a', marginBottom: '0.3rem' }}>Biological &amp; Preclinical Impact:</div>
-                        <p style={{ margin: 0, color: '#334155' }}>{feedbackSuccess.aiBrief.biologicalImpact}</p>
-                      </div>
-                    )}
-                    <button
-                      onClick={() => setFeedbackSuccess(null)}
-                      style={{ marginTop: '1rem', background: '#16a34a', color: 'white', border: 'none', padding: '0.5rem 1rem', borderRadius: '6px', fontSize: '0.82rem', fontWeight: 600, cursor: 'pointer' }}
-                    >
-                      Submit Another Feedback Note
-                    </button>
-                  </div>
-                ) : (
-                  <form onSubmit={handleFeedbackSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-                    <div>
-                      <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, color: '#0f172a', marginBottom: '0.4rem' }}>
-                        Feedback Category
-                      </label>
-                      <select
-                        value={feedbackCategory}
-                        onChange={(e) => setFeedbackCategory(e.target.value)}
-                        style={{ width: '100%', padding: '0.65rem 0.85rem', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.88rem', background: '#ffffff', color: '#0f172a', outline: 'none' }}
-                      >
-                        <option value="Feature Request">🚀 Feature Request / New Indication Discovery</option>
-                        <option value="Scientific Methodology">🔬 Scientific Methodology / Biological Inquiry</option>
-                        <option value="Toxicology & Safety Screen">🛡️ Toxicology / Assay Validation Protocol</option>
-                        <option value="Data Discrepancy & Bug">🐛 Bug Report / Data Discrepancy</option>
-                        <option value="Enterprise Integration">💼 Enterprise / Custom Pipeline Integration</option>
-                      </select>
-                    </div>
-
-                    <div>
-                      <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, color: '#0f172a', marginBottom: '0.4rem' }}>
-                        Your Feedback / Feature Description
-                      </label>
-                      <textarea
-                        rows={5}
-                        value={feedbackText}
-                        onChange={(e) => setFeedbackText(e.target.value)}
-                        placeholder="Describe the feature, target filtering (e.g. blood-brain barrier permeability, kinase selectivity), or workflow enhancement you would like to see..."
-                        style={{ width: '100%', padding: '0.75rem 0.85rem', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.88rem', color: '#0f172a', background: '#ffffff', outline: 'none', resize: 'vertical', lineHeight: 1.5 }}
-                        required
-                      />
-                    </div>
-
-                    <button
-                      type="submit"
-                      disabled={isSubmittingFeedback || !feedbackText.trim()}
-                      style={{
-                        background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '8px',
-                        padding: '0.85rem 1.5rem',
-                        fontSize: '0.92rem',
-                        fontWeight: 700,
-                        cursor: isSubmittingFeedback || !feedbackText.trim() ? 'not-allowed' : 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: '0.5rem',
-                        opacity: isSubmittingFeedback || !feedbackText.trim() ? 0.6 : 1,
-                        boxShadow: '0 4px 12px rgba(2, 132, 199, 0.3)'
-                      }}
-                    >
-                      <Sparkles size={16} />
-                      <span>{isSubmittingFeedback ? 'Gemini 3.7 Synthesizing & Dispatching...' : '🚀 Submit Feedback & Ingest Action Brief'}</span>
-                    </button>
-                  </form>
-                )}
               </div>
             )}
           </div>
@@ -641,7 +436,7 @@ export const DocumentationModal: React.FC<DocumentationModalProps> = ({
           background: '#f8fafc'
         }}>
           <span style={{ fontSize: '0.78rem', color: '#64748b' }}>
-            Silicon Research Group (SRG) &bull; DrugDiscovery.Studio Documentation Center
+            DrugDiscovery.Studio Documentation Center &bull; Knowledge Graph Architecture
           </span>
           <button
             onClick={onClose}
