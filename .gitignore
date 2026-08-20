@@ -6,35 +6,56 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
-# Dependencies & Build
-node_modules
-dist
-dist-ssr
+# Dependencies & Build Output
+node_modules/
+dist/
+dist-ssr/
 *.local
+build/
 
-# Editor directories and files
+# Python Virtual Environments & Cache
+venv/
+.venv/
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Local AI & IDE State Directories
+.gemini/
+.antigravity/
+.antigravitycli/
 .vscode/*
 !.vscode/extensions.json
-.idea
-.DS_Store
+.idea/
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
 
-# SQLite database & data archives
+# OS Generated Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# SQLite Database & Data Archives (Pre-built in Cloud Run or Docker container)
 *.db
 *.db-wal
 *.db-shm
 pubmed_data/
 *.bak
 
-# Large archives and temporary scratch directories
+# Large Archives & Scratch
 *.tar.gz
 *.zip
 scratch/
+screenshots/
 
-# Environment variables
+# Secrets & Environment Variables (STRICT EXCLUSION)
 .env
 .env.*
+!.env.example
