@@ -158,8 +158,12 @@ export default function App() {
   // View Mode: 'landing' (Commercial Showroom) vs 'app' (Discovery Studio Canvas)
   const [viewMode, setViewMode] = useState<'landing' | 'app'>(() => {
     if (typeof window !== 'undefined') {
+      const savedUser = localStorage.getItem('drugdiscovery_user');
       const params = new URLSearchParams(window.location.search);
-      if (params.get('app') === 'true' || params.get('source') || params.get('target') || params.get('payment')) {
+      if (params.get('payment')) {
+        return 'app';
+      }
+      if (savedUser && (params.get('app') === 'true' || params.get('source') || params.get('target'))) {
         return 'app';
       }
     }
@@ -193,6 +197,9 @@ export default function App() {
             }
           }
         }
+      } else {
+        // Ensure unauthenticated users are on the landing page
+        setViewMode('landing');
       }
     });
     return () => unsubscribe();
@@ -2559,6 +2566,14 @@ export default function App() {
       <>
         <LandingPage
           onLaunchApp={(preset) => {
+            if (!authUser) {
+              setPendingLaunchPreset(preset || null);
+              setAuthIntentMessage(preset 
+                ? `Sign up or sign in to investigate ${preset.source} → ${preset.target} (5 free AI discovery runs included).`
+                : 'Sign up or sign in to enter the Drug Discovery Studio (5 free AI discovery runs included).');
+              setIsAuthModalOpen(true);
+              return;
+            }
             setViewMode('app');
             if (preset) {
               setSourceConcept(preset.source);
@@ -2568,7 +2583,10 @@ export default function App() {
           }}
           onOpenDocs={() => setIsDocumentationOpen(true)}
           onOpenPricing={() => setIsPricingModalOpen(true)}
-          onLogin={() => setIsAuthModalOpen(true)}
+          onLogin={() => {
+            setAuthIntentMessage('Sign in or create your free scientist account to access AI literature discovery (5 free runs included).');
+            setIsAuthModalOpen(true);
+          }}
           authUser={authUser}
           onLogout={logout}
           accountTier={accountTier}

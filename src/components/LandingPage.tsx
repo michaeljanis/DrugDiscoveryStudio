@@ -282,7 +282,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   Sign In
                 </button>
                 <button
-                  onClick={() => onLaunchApp()}
+                  onClick={onLogin}
                   style={{
                     background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)',
                     color: '#ffffff',
@@ -299,8 +299,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                     whiteSpace: 'nowrap'
                   }}
                 >
-                  <span>Open Studio</span>
-                  <ArrowRight size={13} />
+                  <Sparkles size={13} />
+                  <span>Get Started Free (5 Runs)</span>
                 </button>
               </>
             )}
@@ -651,7 +651,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           }}></div>
 
           <h2 style={{ fontSize: '2.4rem', fontWeight: 800, color: '#ffffff', margin: '0 0 1.75rem 0', letterSpacing: '-0.02em', lineHeight: 1.25 }}>
-            Why We Built DrugDiscovery.Studio
+            Why We Built This
           </h2>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '2.5rem', marginBottom: '2.5rem' }}>
